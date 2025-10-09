@@ -1,0 +1,28 @@
+/**
+ * Standard error codes used across the application
+ */
+export const ERROR_CODES = {
+  // Authentication & Authorization
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  INVALID_TOKEN: 'INVALID_TOKEN',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  FORBIDDEN: 'FORBIDDEN',
+
+  // Validation
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INVALID_INPUT: 'INVALID_INPUT',
+
+  // Database
+  DUPLICATE_ENTRY: 'DUPLICATE_ENTRY',
+  NOT_FOUND: 'NOT_FOUND',
+  DATABASE_ERROR: 'DATABASE_ERROR',
+
+  // Server
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+
+  // Rate Limiting
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+} as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
