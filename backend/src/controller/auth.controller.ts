@@ -3,23 +3,28 @@ import { authService } from '@/services/auth.service';
 import { sendSuccess } from '@/helpers/response.helper';
 import { AppError } from '@/helpers/error.helper';
 import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { RegisterRequest, LoginRequest, RefreshTokenResponse, RegisterResponse, LoginResponse } from '@/types/auth.type';
-import { REFRESH_TOKEN_COOKIE, getCookieOptions } from '@/config/cookie.config';
+import {
+  RegisterRequest,
+  LoginRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  VerifyEmailRequest,
+  ResendVerificationRequest,
+  RefreshTokenResponse,
+  LoginResponse,
+} from '@/types/auth.type';
+import { REFRESH_TOKEN_COOKIE, getCookieOptions } from '@/config/auth.config';
 import { UserResponse } from '@/types/user.type';
 
 export class AuthController {
   /**
    * Register a new user
+   * Sends verification email to user
    */
   async register(req: Request<{}, any, RegisterRequest>, res: Response, next: NextFunction): Promise<void> {
-    const { user, tokens } = await authService.register(req.body);
+    const result = await authService.register(req.body);
 
-    res.cookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken, getCookieOptions());
-
-    sendSuccess<RegisterResponse>(res, 201, 'User registered successfully', {
-      user,
-      accessToken: tokens.accessToken,
-    });
+    sendSuccess(res, 201, result.message, { email: result.email });
   }
 
   /**
@@ -85,6 +90,47 @@ export class AuthController {
     }
 
     sendSuccess<UserResponse>(res, 200, 'User retrieved successfully', user);
+  }
+
+  /**
+   * Request password reset
+   * Sends reset email to user if account exists
+   */
+  async forgotPassword(req: Request<{}, any, ForgotPasswordRequest>, res: Response, next: NextFunction): Promise<void> {
+    await authService.forgotPassword(req.body);
+
+    // Always return success to prevent email enumeration
+    sendSuccess(res, 200, 'If an account with that email exists, a password reset link has been sent');
+  }
+
+  /**
+   * Reset password using token
+   * Updates user password if token is valid
+   */
+  async resetPassword(req: Request<{}, any, ResetPasswordRequest>, res: Response, next: NextFunction): Promise<void> {
+    await authService.resetPassword(req.body);
+
+    sendSuccess(res, 200, 'Password has been reset successfully');
+  }
+
+  /**
+   * Verify email address using verification token
+   * Marks user's email as verified
+   */
+  async verifyEmail(req: Request<{}, any, VerifyEmailRequest>, res: Response, next: NextFunction): Promise<void> {
+    await authService.verifyEmail(req.body);
+
+    sendSuccess(res, 200, 'Email verified successfully. You can now log in to your account.');
+  }
+
+  /**
+   * Resend email verification
+   * Sends a new verification email to the user
+   */
+  async resendVerification(req: Request<{}, any, ResendVerificationRequest>, res: Response, next: NextFunction): Promise<void> {
+    await authService.resendVerification(req.body);
+
+    sendSuccess(res, 200, 'If an account with that email exists, a verification link has been sent');
   }
 }
 

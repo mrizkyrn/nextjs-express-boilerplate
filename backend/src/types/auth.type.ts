@@ -2,22 +2,18 @@ import { UserResponse } from './user.type';
 import { Permission } from '@/constants/permissions';
 import { UserRole } from '@/types/user.type';
 import { JwtPayload } from 'jsonwebtoken';
+import { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, VerifyEmailInput, ResendVerificationInput } from '@/schemas/auth.schema';
 
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-}
+/**
+ * Types for API request/response payloads
+ */
 
-export interface RegisterResponse {
-  user: UserResponse;
-  accessToken: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
+export type RegisterRequest = RegisterInput;
+export type LoginRequest = LoginInput;
+export type ForgotPasswordRequest = ForgotPasswordInput;
+export type ResetPasswordRequest = ResetPasswordInput;
+export type VerifyEmailRequest = VerifyEmailInput;
+export type ResendVerificationRequest = ResendVerificationInput;
 
 export interface LoginResponse {
   user: UserResponse;
@@ -27,6 +23,10 @@ export interface LoginResponse {
 export interface RefreshTokenResponse {
   accessToken: string;
 }
+
+/**
+ * Types for JWT token payloads and token pairs
+ */
 
 export interface AccessTokenPayload extends JwtPayload {
   userId: string;
@@ -51,18 +51,14 @@ export interface TokenPair {
   refreshTokenExpiresIn: number;
 }
 
+/**
+ * Types for authenticated user data
+ */
+
 export interface AuthenticatedUser {
   id: string;
   email: string;
   name?: string;
   role: UserRole;
   permissions: Permission[];
-}
-
-export interface UserWithPermissions {
-  id: string;
-  email: string;
-  name?: string;
-  role: UserRole;
-  permissions?: Permission[];
 }

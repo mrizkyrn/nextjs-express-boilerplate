@@ -22,6 +22,8 @@ const envSchema = z.object({
     .string()
     .transform((val) => val === 'true')
     .default(false),
+  RESEND_API_KEY: z.string().min(1, 'Resend API key is required'),
+  EMAIL_FROM: z.string().email('Invalid sender email address'),
 });
 
 const parseEnv = () => {

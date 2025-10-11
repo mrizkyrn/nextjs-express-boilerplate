@@ -4,7 +4,14 @@ import { authenticate } from '@/middlewares/auth.middleware';
 import { authLimiter } from '@/middlewares/rateLimiter.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { asyncHandler } from '@/helpers/asyncHandler.helper';
-import { loginSchema, registerSchema } from '@/schemas/auth.schema';
+import {
+  loginSchema,
+  registerSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
+} from '@/schemas/auth.schema';
 
 const router = Router();
 
@@ -42,5 +49,43 @@ router.post('/logout', authenticate, asyncHandler(authController.logout.bind(aut
  * @access  Private
  */
 router.get('/me', authenticate, asyncHandler(authController.me.bind(authController)));
+
+/**
+ * @route   POST /api/auth/verify-email
+ * @desc    Verify email address using token
+ * @access  Public
+ */
+router.post('/verify-email', validate({ body: verifyEmailSchema }), asyncHandler(authController.verifyEmail.bind(authController)));
+
+/**
+ * @route   POST /api/auth/resend-verification
+ * @desc    Resend email verification
+ * @access  Public
+ */
+router.post(
+  '/resend-verification',
+  authLimiter,
+  validate({ body: resendVerificationSchema }),
+  asyncHandler(authController.resendVerification.bind(authController))
+);
+
+/**
+ * @route   POST /api/auth/forgot-password
+ * @desc    Request password reset email
+ * @access  Public
+ */
+router.post(
+  '/forgot-password',
+  authLimiter,
+  validate({ body: forgotPasswordSchema }),
+  asyncHandler(authController.forgotPassword.bind(authController))
+);
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Reset password using token
+ * @access  Public
+ */
+router.post('/reset-password', authLimiter, validate({ body: resetPasswordSchema }), asyncHandler(authController.resetPassword.bind(authController)));
 
 export default router;

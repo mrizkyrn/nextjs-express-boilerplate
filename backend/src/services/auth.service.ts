@@ -1,19 +1,29 @@
 import { prisma } from '@/config/database.config';
-import { AppError } from '@/helpers/error.helper';
+import { env } from '@/config/environment.config';
 import { ERROR_CODES } from '@/constants/errorCodes.constant';
+import { DEFAULT_USER_ROLE } from '@/constants/permissions';
+import { AppError } from '@/helpers/error.helper';
 import { hashPassword, comparePassword } from '@/helpers/password.helper';
 import { generateTokenPair, verifyRefreshToken } from '@/helpers/jwt.helper';
-import { RegisterRequest, LoginRequest } from '@/types/auth.type';
+import { generateSecureToken, calculateTokenExpiry, generateResetPasswordUrl, generateVerifyEmailUrl } from '@/helpers/email.helper';
+import { emailService } from '@/services/email.service';
+import {
+  RegisterRequest,
+  LoginRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  VerifyEmailRequest,
+  ResendVerificationRequest,
+} from '@/types/auth.type';
 import { UserResponse } from '@/types/user.type';
-import { DEFAULT_USER_ROLE } from '@/constants/permissions';
 import { UserRole } from '@/types/user.type';
 
 export class AuthService {
   /**
    * Register a new user account
-   * Creates user with hashed password and generates initial JWT tokens
+   * Creates user with hashed password and sends email verification
    */
-  async register(data: RegisterRequest): Promise<{ user: UserResponse; tokens: { accessToken: string; refreshToken: string } }> {
+  async register(data: RegisterRequest): Promise<{ message: string; email: string }> {
     const { email, password, name } = data;
 
     // Check if email already exists
@@ -27,38 +37,49 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(password);
 
+    // Generate email verification token
+    const verificationToken = generateSecureToken(64);
+    const verificationExpiry = calculateTokenExpiry(24 * 60); // 24 hours
+
+    // Hash verification token before storing
+    const hashedVerificationToken = await hashPassword(verificationToken);
+
     const newUser = await prisma.user.create({
       data: {
         email,
         name,
         password: hashedPassword,
         role: DEFAULT_USER_ROLE,
+        emailVerified: false,
+        emailVerificationToken: hashedVerificationToken,
+        emailVerificationExpiresAt: verificationExpiry,
       },
     });
 
-    const tokens = generateTokenPair(newUser.id, newUser.email, newUser.role, newUser.name);
+    // Generate verification URL
+    const verifyUrl = generateVerifyEmailUrl(verificationToken);
 
-    // Store refresh token in database for security
-    await prisma.user.update({
-      where: { id: newUser.id },
-      data: { refreshToken: tokens.refreshToken },
-    });
+    // Send verification email (non-blocking)
+    emailService
+      .sendVerifyEmail(newUser.email, {
+        userName: newUser.name,
+        verifyUrl,
+        expiresIn: 24 * 60, // 24 hours in minutes
+      })
+      .catch((error) => {
+        // Log error but don't fail registration
+        console.error('Failed to send verification email:', error);
+      });
 
-    const user: UserResponse = {
-      id: newUser.id,
+    return {
+      message: 'Registration successful. Please check your email to verify your account.',
       email: newUser.email,
-      name: newUser.name,
-      role: newUser.role as UserRole,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
     };
-
-    return { user, tokens };
   }
 
   /**
    * Authenticate user and generate tokens
-   * Validates credentials and returns JWT access/refresh tokens
+   * Validates credentials and checks email verification
    */
   async login(data: LoginRequest): Promise<{ user: UserResponse; tokens: { accessToken: string; refreshToken: string } }> {
     const { email, password } = data;
@@ -76,6 +97,11 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new AppError(401, 'Invalid credentials', ERROR_CODES.UNAUTHORIZED);
+    }
+
+    // Check if email is verified
+    if (!foundUser.emailVerified) {
+      throw new AppError(403, 'Please verify your email before logging in', ERROR_CODES.EMAIL_NOT_VERIFIED);
     }
 
     const tokens = generateTokenPair(foundUser.id, foundUser.email, foundUser.role, foundUser.name);
@@ -160,6 +186,215 @@ export class AuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  /**
+   * Request password reset
+   * Generates reset token and sends email with reset link
+   */
+  async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
+    const { email } = data;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Don't reveal if user exists for security reasons
+    if (!user) {
+      return;
+    }
+
+    // Generate secure reset token
+    const resetToken = generateSecureToken(64);
+    const resetTokenExpiry = calculateTokenExpiry(30); // 30 minutes
+
+    // Store hashed token in database
+    const hashedToken = await hashPassword(resetToken);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetToken: hashedToken,
+        passwordResetExpiresAt: resetTokenExpiry,
+      },
+    });
+
+    // Generate reset URL
+    const resetUrl = generateResetPasswordUrl(resetToken);
+
+    // Send password reset email (non-blocking)
+    emailService
+      .sendPasswordResetEmail(user.email, {
+        userName: user.name,
+        resetUrl,
+        expiresIn: 30,
+      })
+      .catch((error) => {
+        // Log error but don't fail the request
+        console.error('Failed to send password reset email:', error);
+      });
+  }
+
+  /**
+   * Reset password using token
+   * Validates reset token and updates user password
+   */
+  async resetPassword(data: ResetPasswordRequest): Promise<void> {
+    const { token, password } = data;
+
+    // Find user with non-expired reset token
+    const users = await prisma.user.findMany({
+      where: {
+        passwordResetToken: { not: null },
+        passwordResetExpiresAt: { gte: new Date() },
+      },
+    });
+
+    // Verify token against stored hash
+    let validUser = null;
+    for (const user of users) {
+      if (user.passwordResetToken) {
+        const isValid = await comparePassword(token, user.passwordResetToken);
+        if (isValid) {
+          validUser = user;
+          break;
+        }
+      }
+    }
+
+    if (!validUser) {
+      throw new AppError(400, 'Invalid or expired reset token', ERROR_CODES.INVALID_RESET_TOKEN);
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPassword(password);
+
+    // Update password and clear reset token
+    await prisma.user.update({
+      where: { id: validUser.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpiresAt: null,
+        refreshToken: null, // Invalidate all sessions
+      },
+    });
+
+    // Send password changed confirmation email (non-blocking)
+    emailService
+      .sendPasswordChangedEmail(validUser.email, {
+        userName: validUser.name,
+        changeTime: new Date(),
+      })
+      .catch((error) => {
+        // Log error but don't fail the request
+        console.error('Failed to send password changed email:', error);
+      });
+  }
+
+  /**
+   * Verify email address using verification token
+   * Marks user's email as verified and sends welcome email
+   */
+  async verifyEmail(data: VerifyEmailRequest): Promise<void> {
+    const { token } = data;
+
+    // Find users with non-expired verification tokens
+    const users = await prisma.user.findMany({
+      where: {
+        emailVerified: false,
+        emailVerificationToken: { not: null },
+        emailVerificationExpiresAt: { gte: new Date() },
+      },
+    });
+
+    // Verify token against stored hash
+    let validUser = null;
+    for (const user of users) {
+      if (user.emailVerificationToken) {
+        const isValid = await comparePassword(token, user.emailVerificationToken);
+        if (isValid) {
+          validUser = user;
+          break;
+        }
+      }
+    }
+
+    if (!validUser) {
+      throw new AppError(400, 'Invalid or expired verification token', ERROR_CODES.INVALID_VERIFICATION_TOKEN);
+    }
+
+    // Mark email as verified and clear verification token
+    await prisma.user.update({
+      where: { id: validUser.id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+      },
+    });
+
+    // Send welcome email (non-blocking)
+    emailService
+      .sendWelcomeEmail(validUser.email, {
+        userName: validUser.name,
+        loginUrl: `${env.FRONTEND_URL}/login`,
+      })
+      .catch((error) => {
+        // Log error but don't fail verification
+        console.error('Failed to send welcome email:', error);
+      });
+  }
+
+  /**
+   * Resend email verification
+   * Generates new verification token and sends verification email
+   */
+  async resendVerification(data: ResendVerificationRequest): Promise<void> {
+    const { email } = data;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Don't reveal if user exists
+    if (!user) {
+      return;
+    }
+
+    // Check if already verified
+    if (user.emailVerified) {
+      throw new AppError(400, 'Email is already verified', ERROR_CODES.VALIDATION_ERROR);
+    }
+
+    // Generate new verification token
+    const verificationToken = generateSecureToken(64);
+    const verificationExpiry = calculateTokenExpiry(24 * 60); // 24 hours
+
+    // Hash verification token before storing
+    const hashedVerificationToken = await hashPassword(verificationToken);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerificationToken: hashedVerificationToken,
+        emailVerificationExpiresAt: verificationExpiry,
+      },
+    });
+
+    // Generate verification URL
+    const verifyUrl = generateVerifyEmailUrl(verificationToken);
+
+    // Send verification email (non-blocking)
+    emailService
+      .sendVerifyEmail(user.email, {
+        userName: user.name,
+        verifyUrl,
+        expiresIn: 24 * 60, // 24 hours in minutes
+      })
+      .catch((error) => {
+        // Log error but don't fail the request
+        console.error('Failed to send verification email:', error);
+      });
   }
 }
 

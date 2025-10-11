@@ -5,7 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && npm run copy:templates",
+    "copy:templates": "xcopy /E /I /Y src\\templates dist\\templates",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -20,15 +21,18 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.16.3",
+    "@types/ejs": "^3.1.5",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "resend": "^6.1.2",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
   },

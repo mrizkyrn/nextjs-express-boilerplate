@@ -1,7 +1,7 @@
 import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { JWT_CONFIG } from '@/config/jwt.config';
+import { JWT_CONFIG } from '@/config/auth.config';
 import { AppError } from '@/helpers/error.helper';
 import { AccessTokenPayload, RefreshTokenPayload, TokenPair, TokenPayload } from '@/types/auth.type';
 

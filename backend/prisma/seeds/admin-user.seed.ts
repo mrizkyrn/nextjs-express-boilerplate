@@ -18,7 +18,7 @@ export async function seedAdminUser(): Promise<void> {
 
   // Use environment variables or defaults
   const adminEmail = (globalThis as any).process?.env?.ADMIN_EMAIL || 'admin@example.com';
-  const adminPassword = (globalThis as any).process?.env?.ADMIN_PASSWORD || 'Admin123!';
+  const adminPassword = (globalThis as any).process?.env?.ADMIN_PASSWORD || 'Admin123';
   const adminName = (globalThis as any).process?.env?.ADMIN_NAME || 'System Administrator';
 
   // Check if admin user already exists
