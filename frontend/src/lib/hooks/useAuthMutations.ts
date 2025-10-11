@@ -6,7 +6,15 @@ import { AxiosError } from 'axios';
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { queryKeys } from '@/lib/api/queryKeys';
-import type { LoginRequest, RegisterRequest, AuthResponse } from '@/lib/types/auth';
+import type {
+  LoginRequest,
+  RegisterRequest,
+  AuthResponse,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  VerifyEmailRequest,
+  ResendVerificationRequest,
+} from '@/lib/types/auth';
 import type { ErrorResponse, SuccessResponse } from '@/lib/types/api';
 
 /**
@@ -61,29 +69,21 @@ export const useLogin = () => {
  */
 export const useRegister = () => {
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
-  const queryClient = useQueryClient();
 
-  return useMutation<SuccessResponse<AuthResponse>, AxiosError<ErrorResponse>, RegisterRequest>({
-    mutationFn: async (data: RegisterRequest): Promise<SuccessResponse<AuthResponse>> => {
+  return useMutation<SuccessResponse<{ email: string }>, AxiosError<ErrorResponse>, RegisterRequest>({
+    mutationFn: async (data: RegisterRequest): Promise<SuccessResponse<{ email: string }>> => {
       return await authApi.register(data);
     },
     onSuccess: (apiResponse) => {
       const { data, message } = apiResponse;
 
-      // Update auth state
-      setAuth(data!.user, data!.accessToken);
-
-      // Invalidate user queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
-
       // Use API success message for better UX
       toast.success(message, {
-        description: `Welcome, ${data!.user.name}!`,
+        description: `Please check ${data?.email} for verification email`,
       });
 
-      // Navigate to dashboard
-      router.push('/dashboard');
+      // Navigate to verify-email page with email as query param
+      router.push(`/verify-email?email=${encodeURIComponent(data?.email || '')}`);
     },
     onError: (error) => {
       const errorMessage = error?.response?.data?.message || 'Unable to create account. Please try again.';
@@ -149,5 +149,144 @@ export const useLogout = () => {
       }
     },
     retry: false, // Don't retry logout
+  });
+};
+
+/**
+ * Hook for email verification
+ * @returns Mutation object with verifyEmail function and state
+ */
+export const useVerifyEmail = () => {
+  const router = useRouter();
+
+  return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, VerifyEmailRequest>({
+    mutationFn: async (data: VerifyEmailRequest): Promise<SuccessResponse<null>> => {
+      return await authApi.verifyEmail(data);
+    },
+    onSuccess: (apiResponse) => {
+      const { message } = apiResponse;
+
+      toast.success(message, {
+        description: 'You can now log in to your account',
+      });
+
+      // Navigate to login
+      router.push('/login');
+    },
+    onError: (error) => {
+      const errorMessage = error?.response?.data?.message || 'Invalid or expired verification token';
+
+      toast.error('Verification failed', {
+        description: errorMessage,
+      });
+
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Verification error:', error);
+      }
+    },
+    retry: false,
+  });
+};
+
+/**
+ * Hook for resending verification email
+ * @returns Mutation object with resendVerification function and state
+ */
+export const useResendVerification = () => {
+  return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, ResendVerificationRequest>({
+    mutationFn: async (data: ResendVerificationRequest): Promise<SuccessResponse<null>> => {
+      return await authApi.resendVerification(data);
+    },
+    onSuccess: (apiResponse) => {
+      const { message } = apiResponse;
+
+      toast.success(message, {
+        description: 'Please check your email inbox',
+      });
+    },
+    onError: (error) => {
+      const errorMessage = error?.response?.data?.message || 'Failed to resend verification email';
+
+      toast.error('Resend failed', {
+        description: errorMessage,
+      });
+
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Resend verification error:', error);
+      }
+    },
+    retry: false,
+  });
+};
+
+/**
+ * Hook for requesting password reset
+ * @returns Mutation object with forgotPassword function and state
+ */
+export const useForgotPassword = () => {
+  const router = useRouter();
+
+  return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, ForgotPasswordRequest>({
+    mutationFn: async (data: ForgotPasswordRequest): Promise<SuccessResponse<null>> => {
+      return await authApi.forgotPassword(data);
+    },
+    onSuccess: (apiResponse) => {
+      const { message } = apiResponse;
+
+      toast.success(message, {
+        description: 'Please check your email for instructions',
+      });
+
+      // Navigate to a confirmation page or back to login
+      router.push('/login');
+    },
+    onError: (error) => {
+      const errorMessage = error?.response?.data?.message || 'Failed to process password reset request';
+
+      toast.error('Request failed', {
+        description: errorMessage,
+      });
+
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Forgot password error:', error);
+      }
+    },
+    retry: false,
+  });
+};
+
+/**
+ * Hook for resetting password
+ * @returns Mutation object with resetPassword function and state
+ */
+export const useResetPassword = () => {
+  const router = useRouter();
+
+  return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, ResetPasswordRequest>({
+    mutationFn: async (data: ResetPasswordRequest): Promise<SuccessResponse<null>> => {
+      return await authApi.resetPassword(data);
+    },
+    onSuccess: (apiResponse) => {
+      const { message } = apiResponse;
+
+      toast.success(message, {
+        description: 'You can now log in with your new password',
+      });
+
+      // Navigate to login
+      router.push('/login');
+    },
+    onError: (error) => {
+      const errorMessage = error?.response?.data?.message || 'Invalid or expired reset token';
+
+      toast.error('Password reset failed', {
+        description: errorMessage,
+      });
+
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Reset password error:', error);
+      }
+    },
+    retry: false,
   });
 };
