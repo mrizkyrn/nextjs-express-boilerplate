@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { SuccessResponse, PaginationMeta, ErrorDetail, ErrorResponse } from '@/types/response.type';
-import { ErrorCode } from '@/constants/errorCodes.constant';
+import { ErrorCode } from '@/config/error.config';
+import type { ErrorDetail, ErrorResponse, PaginationMeta, SuccessResponse } from '@/types/response.type';
 
 /**
  * Send a standardized success response
@@ -73,24 +73,4 @@ export const sendErrorResponse = (
   };
 
   return res.status(statusCode).json(response);
-};
-
-/**
- * Helper to calculate pagination metadata
- * @param page - Current page number
- * @param limit - Items per page
- * @param total - Total number of items
- * @returns Pagination metadata
- */
-export const calculatePagination = (page: number, limit: number, total: number): PaginationMeta => {
-  const totalPages = Math.ceil(total / limit);
-
-  return {
-    page,
-    limit,
-    total,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1,
-  };
 };

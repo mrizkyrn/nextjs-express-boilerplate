@@ -1,9 +1,10 @@
-import { resend, EMAIL_CONFIG, EMAIL_SUBJECTS } from '@/config/email.config';
-import { AppError } from '@/helpers/error.helper';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { logger } from '@/config/logger.config';
-import { emailTemplateRenderer } from '@/helpers/emailTemplate.helper';
-import { EmailOptions, WelcomeEmailData, PasswordResetEmailData, PasswordChangedEmailData, VerifyEmailData } from '@/types/email.type';
+import { EMAIL_CONFIG, EMAIL_SUBJECTS } from '@/config/email.config';
+import { ERROR_CODES } from '@/config/error.config';
+import { emailTemplateRenderer } from '@/libs/ejs.lib';
+import { logger } from '@/libs/logger.lib';
+import { resend } from '@/libs/resend.lib';
+import type { EmailOptions, PasswordChangedEmailData, PasswordResetEmailData, VerifyEmailData, WelcomeEmailData } from '@/types/email.type';
+import { AppError } from '@/utils/error.util';
 
 export class EmailService {
   /**

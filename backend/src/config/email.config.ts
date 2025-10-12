@@ -1,10 +1,4 @@
-import { Resend } from 'resend';
 import { env } from './environment.config';
-
-/**
- * Initialize Resend client with API key from environment
- */
-export const resend = new Resend(env.RESEND_API_KEY);
 
 /**
  * Email configuration constants

@@ -5,7 +5,7 @@
   <a href="<%= verifyUrl %>" class="button">Verify Email</a>
 </div>
 <div class="warning">
-  <strong>⚠️ Important:</strong> This link will expire in <%= expiresIn %> hours.
+  <strong>⚠️ Important:</strong> This link will expire in <%= Math.floor(expiresIn / 60) %> hours.
 </div>
 <p>If you didn't create this account, you can safely ignore this email.</p>
 <p>Best regards,<br>The Team</p>

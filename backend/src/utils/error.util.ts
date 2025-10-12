@@ -1,5 +1,5 @@
-import { ERROR_CODES, ErrorCode } from '@/constants/errorCodes.constant';
-import { ErrorDetail } from '@/types/response.type';
+import { ERROR_CODES, ErrorCode } from '@/config/error.config';
+import type { ErrorDetail } from '@/types/response.type';
 
 /**
  * Custom error class with error code support

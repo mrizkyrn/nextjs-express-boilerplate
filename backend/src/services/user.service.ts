@@ -1,18 +1,18 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '@/config/database.config';
-import { hashPassword, comparePassword } from '@/helpers/password.helper';
-import { AppError } from '@/helpers/error.helper';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { UserRole } from '@/types/user.type';
-import type { UserResponse, GetUsersQuery, CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest } from '@/types/user.type';
+import { ERROR_CODES } from '@/config/error.config';
+import { userHelper } from '@/helpers/user.helper';
+import { prisma } from '@/libs/prisma.lib';
 import type { PaginationMeta } from '@/types/response.type';
-import { calculatePagination, calculateSkip, normalizePaginationParams } from '@/helpers/pagination.helper';
+import type { CreateUserRequest, GetUsersQueryParams, UpdatePasswordRequest, UpdateUserRequest, UserResponse } from '@/types/user.type';
+import { AppError } from '@/utils/error.util';
+import { calculatePagination, calculateSkip, normalizePaginationParams } from '@/utils/pagination.util';
+import { comparePassword, hashPassword } from '@/utils/password.util';
+import { Prisma, UserRole } from '@prisma/client';
 
 export class UserService {
   /**
    * Get paginated list of users with filtering and sorting
    */
-  async getUsers(query: GetUsersQuery): Promise<{ users: UserResponse[]; pagination: PaginationMeta }> {
+  async getUsers(query: GetUsersQueryParams): Promise<{ users: UserResponse[]; pagination: PaginationMeta }> {
     const { page, limit } = normalizePaginationParams(query.page, query.limit);
     const { search, role, sortBy = 'createdAt', sortOrder = 'desc' } = query;
     const skip = calculateSkip(page, limit);
@@ -33,20 +33,13 @@ export class UserService {
         skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+        select: userHelper.getUserSelect(),
       }),
     ]);
 
     const pagination = calculatePagination(page, limit, total);
 
-    return { users: users as UserResponse[], pagination };
+    return { users: users.map(userHelper.createUserResponse), pagination };
   }
 
   /**
@@ -55,21 +48,14 @@ export class UserService {
   async getUserById(id: string): Promise<UserResponse> {
     const user = await prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: userHelper.getUserSelect(),
     });
 
     if (!user) {
       throw new AppError(404, 'User not found', ERROR_CODES.NOT_FOUND);
     }
 
-    return user as UserResponse;
+    return userHelper.createUserResponse(user);
   }
 
   /**
@@ -98,17 +84,10 @@ export class UserService {
         name,
         role,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: userHelper.getUserSelect(),
     });
 
-    return user as UserResponse;
+    return userHelper.createUserResponse(user);
   }
 
   /**
@@ -139,17 +118,10 @@ export class UserService {
     const user = await prisma.user.update({
       where: { id },
       data,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: userHelper.getUserSelect(),
     });
 
-    return user as UserResponse;
+    return userHelper.createUserResponse(user);
   }
 
   /**
@@ -213,10 +185,13 @@ export class UserService {
       }),
     ]);
 
-    const byRole = roleStats.reduce((acc, stat) => {
-      acc[stat.role] = stat._count;
-      return acc;
-    }, {} as Record<string, number>);
+    const byRole = roleStats.reduce(
+      (acc, stat) => {
+        acc[stat.role] = stat._count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return { total, byRole };
   }

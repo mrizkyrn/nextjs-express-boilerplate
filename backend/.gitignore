@@ -2,6 +2,7 @@
 node_modules/
 
 # Logs
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -89,9 +90,8 @@ jest-coverage/
 cypress/videos/
 cypress/screenshots/
 
-# Optional: Postman collections (uncomment to ignore)
-# tests/**/*.postman_collection.json
-# tests/**/*.postman_environment.json
+# Optional: Postman collections
+# postman/
 
 # Optional: Lock files (uncomment to ignore)
 # package-lock.json

@@ -1,7 +1,8 @@
-import winston from 'winston';
 import path from 'path';
+import winston from 'winston';
+import { env } from '@/config/environment.config';
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = env.NODE_ENV !== 'production';
 
 // Console format for development (colorized, human-readable)
 const consoleFormat = winston.format.combine(
@@ -15,7 +16,12 @@ const consoleFormat = winston.format.combine(
 );
 
 // File format (JSON without colors, includes all metadata)
-const fileFormat = winston.format.combine(winston.format.errors({ stack: true }), winston.format.timestamp(), winston.format.json());
+const fileFormat = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.errors({ stack: true }),
+  winston.format.splat(),
+  winston.format.json()
+);
 
 export const logger = winston.createLogger({
   level: isDevelopment ? 'debug' : 'info',

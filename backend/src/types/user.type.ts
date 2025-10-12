@@ -1,6 +1,20 @@
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+import { CreateUserBody, UpdatePasswordBody, UpdateUserBody } from '@/schemas/user.schema';
+import { UserRole } from '@prisma/client';
+
+/**
+ * Types for API request/response payloads
+ */
+export type CreateUserRequest = CreateUserBody;
+export type UpdateUserRequest = UpdateUserBody;
+export type UpdatePasswordRequest = UpdatePasswordBody;
+
+export interface GetUsersQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: UserRole;
+  sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'email';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface UserResponse {
@@ -10,31 +24,4 @@ export interface UserResponse {
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface GetUsersQuery {
-  page?: number;
-  limit?: number;
-  search?: string;
-  role?: UserRole;
-  sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'email';
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface UpdateUserRequest {
-  name?: string;
-  email?: string;
-  role?: UserRole;
-}
-
-export interface UpdatePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-}
-
-export interface CreateUserRequest {
-  name: string;
-  email: string;
-  password: string;
-  role?: UserRole;
 }

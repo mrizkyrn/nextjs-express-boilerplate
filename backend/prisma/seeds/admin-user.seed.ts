@@ -41,6 +41,7 @@ export async function seedAdminUser(): Promise<void> {
       name: adminName,
       password: hashedPassword,
       role: UserRole.ADMIN,
+      emailVerified: true,
     },
   });
 

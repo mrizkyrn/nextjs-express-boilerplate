@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library';
+import { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { logger } from '@/config/logger.config';
-import { ErrorResponse, ErrorDetail } from '@/types/response.type';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { AppError } from '@/helpers/error.helper';
-import { sendErrorResponse } from '@/helpers/response.helper';
+import { ERROR_CODES } from '@/config/error.config';
+import { logger } from '@/libs/logger.lib';
+import type { ErrorDetail, ErrorResponse } from '@/types/response.type';
+import { AppError } from '@/utils/error.util';
+import { sendErrorResponse } from '@/utils/response.util';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 /**
  * Global error handler middleware
@@ -64,15 +64,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
   // Handle custom AppError
   if (err instanceof AppError) {
     return sendErrorResponse(res, err.statusCode, err.message, err.errorCode, err.details, err.stack);
-  }
-
-  // Handle JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    return sendErrorResponse(res, 401, 'Invalid token', ERROR_CODES.INVALID_TOKEN, undefined, err.stack);
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    return sendErrorResponse(res, 401, 'Token expired', ERROR_CODES.TOKEN_EXPIRED, undefined, err.stack);
   }
 
   // Handle rate limit errors

@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken } from '@/helpers/jwt.helper';
-import { asyncHandler } from '@/helpers/asyncHandler.helper';
-import { AppError } from '@/helpers/error.helper';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { enrichUserWithPermissions } from '@/helpers/rbac.helper';
+import { NextFunction, Request, Response } from 'express';
+import { ERROR_CODES } from '@/config/error.config';
+import { asyncHandler } from '@/utils/asyncHandler.util';
+import { AppError } from '@/utils/error.util';
+import { verifyAccessToken } from '@/utils/jwt.util';
+import { enrichUserWithPermissions } from '@/utils/rbac.util';
 
 /**
  * Authentication middleware
@@ -16,6 +16,7 @@ export const authenticate = asyncHandler(async (req: Request, res: Response, nex
   }
 
   const token = authHeader.split(' ')[1];
+  console.log('Token:', token); // Debugging line to check the token value
   const payload = verifyAccessToken(token);
 
   // Enrich user with permissions based on role

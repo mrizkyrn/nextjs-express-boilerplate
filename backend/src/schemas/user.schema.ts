@@ -1,4 +1,4 @@
-import { UserRole } from '@/types/user.type';
+import { UserRole } from '@prisma/client';
 import { z } from 'zod';
 
 export const getUsersQuerySchema = z.object({

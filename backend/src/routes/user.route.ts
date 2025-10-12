@@ -1,11 +1,11 @@
 import { Router } from 'express';
+import { Permission } from '@/config/rbac.config';
 import { userController } from '@/controller/user.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { requirePermissions } from '@/middlewares/authorization.middleware';
 import { validate } from '@/middlewares/validate.middleware';
-import { asyncHandler } from '@/helpers/asyncHandler.helper';
-import { Permission } from '@/constants/permissions';
-import { getUsersQuerySchema, createUserSchema, updateUserSchema, updatePasswordSchema } from '@/schemas/user.schema';
+import { createUserSchema, getUsersQuerySchema, updatePasswordSchema, updateUserSchema } from '@/schemas/user.schema';
+import { asyncHandler } from '@/utils/asyncHandler.util';
 
 const router = Router();
 
@@ -13,36 +13,46 @@ const router = Router();
 router.use(authenticate);
 
 /**
- * @route   GET /api/users/stats
- * @desc    Get user statistics (admin only)
- * @access  Admin
- */
-router.get('/stats', requirePermissions([Permission.USER_LIST]), asyncHandler(userController.getUserStats.bind(userController)));
-
-/**
  * @route   GET /api/users/me
  * @desc    Get current user profile
  * @access  Authenticated users
  */
-router.get('/me', asyncHandler(userController.getCurrentUser.bind(userController)));
+router.get('/me', requirePermissions([Permission.CURRENT_USER_READ]), asyncHandler(userController.getCurrentUser.bind(userController)));
 
 /**
  * @route   PATCH /api/users/me
  * @desc    Update current user profile
  * @access  Authenticated users
  */
-router.patch('/me', validate({ body: updateUserSchema }), asyncHandler(userController.updateCurrentUser.bind(userController)));
+router.patch(
+  '/me',
+  requirePermissions([Permission.CURRENT_USER_UPDATE]),
+  validate({ body: updateUserSchema }),
+  asyncHandler(userController.updateCurrentUser.bind(userController))
+);
 
 /**
  * @route   PATCH /api/users/me/password
  * @desc    Update current user password
  * @access  Authenticated users
  */
-router.patch('/me/password', validate({ body: updatePasswordSchema }), asyncHandler(userController.updatePassword.bind(userController)));
+router.patch(
+  '/me/password',
+  requirePermissions([Permission.CURRENT_USER_UPDATE]),
+  validate({ body: updatePasswordSchema }),
+  asyncHandler(userController.updatePassword.bind(userController))
+);
+
+/**
+ * @route   GET /api/users/stats
+ * @desc    Get user statistics (admin only)
+ * @access  Admin
+ */
+router.get('/stats', requirePermissions([Permission.USER_STATS]), asyncHandler(userController.getUserStats.bind(userController)));
 
 /**
  * @route   GET /api/users
- * @desc    Get paginated list of users
+ * @desc    Get paginated list of users (admin only)
  * @access  Admin
  */
 router.get(
@@ -66,14 +76,14 @@ router.post(
 
 /**
  * @route   GET /api/users/:id
- * @desc    Get user by ID
+ * @desc    Get user by ID (admin only)
  * @access  Admin
  */
 router.get('/:id', requirePermissions([Permission.USER_READ]), asyncHandler(userController.getUserById.bind(userController)));
 
 /**
  * @route   PATCH /api/users/:id
- * @desc    Update user by ID
+ * @desc    Update user by ID (admin only)
  * @access  Admin
  */
 router.patch(
@@ -85,7 +95,7 @@ router.patch(
 
 /**
  * @route   DELETE /api/users/:id
- * @desc    Delete user by ID
+ * @desc    Delete user by ID (admin only)
  * @access  Admin
  */
 router.delete('/:id', requirePermissions([Permission.USER_DELETE]), asyncHandler(userController.deleteUser.bind(userController)));

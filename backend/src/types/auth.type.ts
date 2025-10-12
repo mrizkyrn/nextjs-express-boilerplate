@@ -1,8 +1,8 @@
-import { UserResponse } from './user.type';
-import { Permission } from '@/constants/permissions';
-import { UserRole } from '@/types/user.type';
-import { JwtPayload } from 'jsonwebtoken';
-import { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, VerifyEmailInput, ResendVerificationInput } from '@/schemas/auth.schema';
+import type { JwtPayload } from 'jsonwebtoken';
+import { Permission } from '@/config/rbac.config';
+import { ForgotPasswordInput, LoginInput, RegisterInput, ResendVerificationInput, ResetPasswordInput, VerifyEmailInput } from '@/schemas/auth.schema';
+import { UserRole } from '@prisma/client';
+import type { UserResponse } from './user.type';
 
 /**
  * Types for API request/response payloads

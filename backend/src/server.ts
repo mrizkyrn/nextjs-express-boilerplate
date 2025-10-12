@@ -1,13 +1,12 @@
-import { createApp } from './app';
 import { env } from '@/config/environment.config';
-import { prisma, disconnectDatabase } from '@/config/database.config';
-import { logger } from '@/config/logger.config';
+import { logger } from '@/libs/logger.lib';
+import { connectDatabase, disconnectDatabase } from '@/libs/prisma.lib';
+import { createApp } from './app';
 
 const startServer = async () => {
   try {
     // Test database connection
-    await prisma.$connect();
-    logger.info('✅ Database connected successfully');
+    await connectDatabase();
 
     // Create Express app
     const app = createApp();

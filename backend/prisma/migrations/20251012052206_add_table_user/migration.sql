@@ -14,6 +14,7 @@ CREATE TABLE "users" (
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "emailVerificationToken" TEXT,
     "emailVerificationExpiresAt" TIMESTAMP(3),
+    "emailVerificationIssuedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

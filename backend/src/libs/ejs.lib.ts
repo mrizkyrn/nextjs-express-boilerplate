@@ -1,15 +1,16 @@
 import * as ejs from 'ejs';
-import * as path from 'path';
 import * as fs from 'fs';
-import { fileURLToPath } from 'url';
+import * as path from 'path';
 import { dirname } from 'path';
-import {
+import { fileURLToPath } from 'url';
+import type {
   BaseTemplateData,
   PasswordChangedTemplateData,
   PasswordResetTemplateData,
   VerifyEmailTemplateData,
   WelcomeTemplateData,
 } from '@/types/email.type';
+import { logger } from './logger.lib';
 
 /**
  * Email Template Renderer
@@ -59,7 +60,7 @@ export class EmailTemplateRenderer {
 
       return { html, text };
     } catch (error) {
-      console.error(`Error rendering template ${templateName}:`, error);
+      logger.error(`Error rendering template ${templateName}:`, error);
       throw error;
     }
   }

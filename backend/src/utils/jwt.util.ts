@@ -1,13 +1,12 @@
-import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { JWT_CONFIG } from '@/config/auth.config';
-import { AppError } from '@/helpers/error.helper';
-import { AccessTokenPayload, RefreshTokenPayload, TokenPair, TokenPayload } from '@/types/auth.type';
+import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
+import { jwtConfig } from '@/config/auth.config';
+import { ERROR_CODES } from '@/config/error.config';
+import type { AccessTokenPayload, RefreshTokenPayload, TokenPair, TokenPayload } from '@/types/auth.type';
+import { AppError } from '@/utils/error.util';
 
 /**
  * Generate a unique token ID for refresh tokens
- * @return A unique token ID
  */
 const generateTokenId = (): string => {
   return randomBytes(16).toString('hex');
@@ -15,16 +14,12 @@ const generateTokenId = (): string => {
 
 /**
  * Sign a JWT token with proper error handling
- * @param payload - Token payload
- * @param secret - Secret key
- * @param options - Signing options
- * @returns Signed JWT token
  */
 const signToken = (payload: TokenPayload, secret: string, options: SignOptions): string => {
   try {
     return jwt.sign(payload, secret, {
       ...options,
-      algorithm: JWT_CONFIG.algorithm,
+      algorithm: jwtConfig.algorithm,
     });
   } catch (error) {
     throw new AppError(500, 'Failed to generate token', ERROR_CODES.INTERNAL_SERVER_ERROR);
@@ -33,16 +28,12 @@ const signToken = (payload: TokenPayload, secret: string, options: SignOptions):
 
 /**
  * Verify a JWT token with proper error handling
- * @param token - JWT token to verify
- * @param secret - Secret key
- * @param options - Verification options
- * @returns Decoded token payload
  */
 const verifyToken = <T extends TokenPayload>(token: string, secret: string, options?: VerifyOptions): T => {
   try {
     const decoded = jwt.verify(token, secret, {
       ...options,
-      algorithms: [JWT_CONFIG.algorithm],
+      algorithms: [jwtConfig.algorithm],
     }) as T;
 
     // Additional validation
@@ -91,8 +82,8 @@ export const generateAccessToken = (userId: string, email: string, role: string,
     iat: Math.floor(Date.now() / 1000), // Issued at
   };
 
-  return signToken(payload, JWT_CONFIG.accessToken.secret, {
-    expiresIn: JWT_CONFIG.accessToken.expiresIn,
+  return signToken(payload, jwtConfig.accessToken.secret, {
+    expiresIn: jwtConfig.accessToken.expiresIn,
   });
 };
 
@@ -110,8 +101,8 @@ export const generateRefreshToken = (userId: string): string => {
     iat: Math.floor(Date.now() / 1000), // Issued at
   };
 
-  return signToken(payload, JWT_CONFIG.refreshToken.secret, {
-    expiresIn: JWT_CONFIG.refreshToken.expiresIn,
+  return signToken(payload, jwtConfig.refreshToken.secret, {
+    expiresIn: jwtConfig.refreshToken.expiresIn,
   });
 };
 
@@ -145,7 +136,7 @@ export const generateTokenPair = (userId: string, email: string, role: string, n
  * @returns Decoded access token payload
  */
 export const verifyAccessToken = (token: string): AccessTokenPayload => {
-  return verifyToken<AccessTokenPayload>(token, JWT_CONFIG.accessToken.secret);
+  return verifyToken<AccessTokenPayload>(token, jwtConfig.accessToken.secret);
 };
 
 /**
@@ -154,70 +145,5 @@ export const verifyAccessToken = (token: string): AccessTokenPayload => {
  * @returns Decoded refresh token payload
  */
 export const verifyRefreshToken = (token: string): RefreshTokenPayload => {
-  return verifyToken<RefreshTokenPayload>(token, JWT_CONFIG.refreshToken.secret);
-};
-
-/**
- * Refresh access token using a valid refresh token
- * @param refreshToken - Valid refresh token
- * @returns New token pair
- */
-export const refreshAccessToken = (refreshToken: string): TokenPair => {
-  try {
-    // Verify the refresh token
-    const decoded = verifyRefreshToken(refreshToken);
-
-    // Generate new tokens (token rotation for security)
-    return generateTokenPair(decoded.userId, decoded.email || '', decoded.role);
-  } catch (error) {
-    if (error instanceof AppError) {
-      throw error;
-    }
-    throw new AppError(401, 'Invalid refresh token', ERROR_CODES.INVALID_TOKEN);
-  }
-};
-
-/**
- * Decode token without verification (for debugging only)
- * WARNING: Do not use in production for security decisions
- * @param token - JWT token
- * @returns Decoded payload or null
- */
-export const decodeTokenUnsafe = (token: string): TokenPayload | null => {
-  try {
-    return jwt.decode(token) as TokenPayload;
-  } catch {
-    return null;
-  }
-};
-
-/**
- * Check if token is expired without full verification
- * @param token - JWT token
- * @returns True if expired, false otherwise
- */
-export const isTokenExpired = (token: string): boolean => {
-  try {
-    const decoded = decodeTokenUnsafe(token);
-    if (!decoded || !decoded.exp) {
-      return true;
-    }
-    return decoded.exp < Math.floor(Date.now() / 1000);
-  } catch {
-    return true;
-  }
-};
-
-/**
- * Get token expiration time
- * @param token - JWT token
- * @returns Expiration timestamp or null
- */
-export const getTokenExpiration = (token: string): number | null => {
-  try {
-    const decoded = decodeTokenUnsafe(token);
-    return decoded?.exp || null;
-  } catch {
-    return null;
-  }
+  return verifyToken<RefreshTokenPayload>(token, jwtConfig.refreshToken.secret);
 };

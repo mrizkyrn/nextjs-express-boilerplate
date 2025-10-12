@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
-
-const SALT_ROUNDS = 12;
+import { APP_CONSTANTS } from '@/config/constants.config';
 
 /**
  * Hash a password
@@ -8,7 +7,7 @@ const SALT_ROUNDS = 12;
  * @return Hashed password
  */
 export const hashPassword = async (password: string): Promise<string> => {
-  return bcrypt.hash(password, SALT_ROUNDS);
+  return bcrypt.hash(password, APP_CONSTANTS.PASSWORD_SALT_ROUNDS);
 };
 
 /** Compare a password with its hash

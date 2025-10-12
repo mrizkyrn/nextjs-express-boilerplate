@@ -1,22 +1,23 @@
-import { prisma } from '@/config/database.config';
+import { APP_CONSTANTS } from '@/config/constants.config';
 import { env } from '@/config/environment.config';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
-import { DEFAULT_USER_ROLE } from '@/constants/permissions';
-import { AppError } from '@/helpers/error.helper';
-import { hashPassword, comparePassword } from '@/helpers/password.helper';
-import { generateTokenPair, verifyRefreshToken } from '@/helpers/jwt.helper';
-import { generateSecureToken, calculateTokenExpiry, generateResetPasswordUrl, generateVerifyEmailUrl } from '@/helpers/email.helper';
+import { ERROR_CODES } from '@/config/error.config';
+import { DEFAULT_USER_ROLE } from '@/config/rbac.config';
+import { authHelper } from '@/helpers/auth.helper';
+import { logger } from '@/libs/logger.lib';
+import { prisma } from '@/libs/prisma.lib';
 import { emailService } from '@/services/email.service';
-import {
-  RegisterRequest,
-  LoginRequest,
+import type {
   ForgotPasswordRequest,
+  LoginRequest,
+  RegisterRequest,
+  ResendVerificationRequest,
   ResetPasswordRequest,
   VerifyEmailRequest,
-  ResendVerificationRequest,
 } from '@/types/auth.type';
-import { UserResponse } from '@/types/user.type';
-import { UserRole } from '@/types/user.type';
+import type { UserResponse } from '@/types/user.type';
+import { AppError } from '@/utils/error.util';
+import { generateTokenPair, verifyRefreshToken } from '@/utils/jwt.util';
+import { comparePassword, hashPassword } from '@/utils/password.util';
 
 export class AuthService {
   /**
@@ -38,8 +39,8 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     // Generate email verification token
-    const verificationToken = generateSecureToken(64);
-    const verificationExpiry = calculateTokenExpiry(24 * 60); // 24 hours
+    const verificationToken = authHelper.generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
+    const verificationExpiry = authHelper.calculateTokenExpiry(APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES); // 24 hours
 
     // Hash verification token before storing
     const hashedVerificationToken = await hashPassword(verificationToken);
@@ -53,22 +54,23 @@ export class AuthService {
         emailVerified: false,
         emailVerificationToken: hashedVerificationToken,
         emailVerificationExpiresAt: verificationExpiry,
+        emailVerificationIssuedAt: new Date(),
       },
     });
 
     // Generate verification URL
-    const verifyUrl = generateVerifyEmailUrl(verificationToken);
+    const verifyUrl = authHelper.generateVerifyEmailUrl(verificationToken);
 
     // Send verification email (non-blocking)
     emailService
       .sendVerifyEmail(newUser.email, {
         userName: newUser.name,
         verifyUrl,
-        expiresIn: 24 * 60, // 24 hours in minutes
+        expiresIn: APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES,
       })
       .catch((error) => {
         // Log error but don't fail registration
-        console.error('Failed to send verification email:', error);
+        logger.error('Failed to send verification email:', error);
       });
 
     return {
@@ -112,14 +114,7 @@ export class AuthService {
       data: { refreshToken: tokens.refreshToken },
     });
 
-    const user: UserResponse = {
-      id: foundUser.id,
-      email: foundUser.email,
-      name: foundUser.name,
-      role: foundUser.role as UserRole,
-      createdAt: foundUser.createdAt,
-      updatedAt: foundUser.updatedAt,
-    };
+    const user = authHelper.createUserResponse(foundUser);
 
     return { user, tokens };
   }
@@ -178,14 +173,7 @@ export class AuthService {
       return null;
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role as UserRole,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return authHelper.createUserResponse(user);
   }
 
   /**
@@ -205,8 +193,8 @@ export class AuthService {
     }
 
     // Generate secure reset token
-    const resetToken = generateSecureToken(64);
-    const resetTokenExpiry = calculateTokenExpiry(30); // 30 minutes
+    const resetToken = authHelper.generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
+    const resetTokenExpiry = authHelper.calculateTokenExpiry(APP_CONSTANTS.PASSWORD_RESET_EXPIRY_MINUTES); // 30 minutes
 
     // Store hashed token in database
     const hashedToken = await hashPassword(resetToken);
@@ -219,18 +207,18 @@ export class AuthService {
     });
 
     // Generate reset URL
-    const resetUrl = generateResetPasswordUrl(resetToken);
+    const resetUrl = authHelper.generateResetPasswordUrl(resetToken);
 
     // Send password reset email (non-blocking)
     emailService
       .sendPasswordResetEmail(user.email, {
         userName: user.name,
         resetUrl,
-        expiresIn: 30,
+        expiresIn: APP_CONSTANTS.PASSWORD_RESET_EXPIRY_MINUTES,
       })
       .catch((error) => {
         // Log error but don't fail the request
-        console.error('Failed to send password reset email:', error);
+        logger.error('Failed to send password reset email:', error);
       });
   }
 
@@ -287,7 +275,7 @@ export class AuthService {
       })
       .catch((error) => {
         // Log error but don't fail the request
-        console.error('Failed to send password changed email:', error);
+        logger.error('Failed to send password changed email:', error);
       });
   }
 
@@ -341,7 +329,7 @@ export class AuthService {
       })
       .catch((error) => {
         // Log error but don't fail verification
-        console.error('Failed to send welcome email:', error);
+        logger.error('Failed to send welcome email:', error);
       });
   }
 
@@ -366,9 +354,24 @@ export class AuthService {
       throw new AppError(400, 'Email is already verified', ERROR_CODES.VALIDATION_ERROR);
     }
 
+    // Check cooldown period
+    if (user.emailVerificationIssuedAt) {
+      const timeSinceLastEmail = Date.now() - user.emailVerificationIssuedAt.getTime();
+      const cooldownMs = APP_CONSTANTS.VERIFICATION_EMAIL_COOLDOWN_MINUTES * 60 * 1000;
+
+      if (timeSinceLastEmail < cooldownMs) {
+        const remainingMinutes = Math.ceil((cooldownMs - timeSinceLastEmail) / (60 * 1000));
+        throw new AppError(
+          429,
+          `Please wait ${remainingMinutes} minute(s) before requesting another verification email`,
+          ERROR_CODES.RATE_LIMIT_EXCEEDED
+        );
+      }
+    }
+
     // Generate new verification token
-    const verificationToken = generateSecureToken(64);
-    const verificationExpiry = calculateTokenExpiry(24 * 60); // 24 hours
+    const verificationToken = authHelper.generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
+    const verificationExpiry = authHelper.calculateTokenExpiry(APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES); // 24 hours
 
     // Hash verification token before storing
     const hashedVerificationToken = await hashPassword(verificationToken);
@@ -378,22 +381,23 @@ export class AuthService {
       data: {
         emailVerificationToken: hashedVerificationToken,
         emailVerificationExpiresAt: verificationExpiry,
+        emailVerificationIssuedAt: new Date(),
       },
     });
 
     // Generate verification URL
-    const verifyUrl = generateVerifyEmailUrl(verificationToken);
+    const verifyUrl = authHelper.generateVerifyEmailUrl(verificationToken);
 
     // Send verification email (non-blocking)
     emailService
       .sendVerifyEmail(user.email, {
         userName: user.name,
         verifyUrl,
-        expiresIn: 24 * 60, // 24 hours in minutes
+        expiresIn: APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES,
       })
       .catch((error) => {
         // Log error but don't fail the request
-        console.error('Failed to send verification email:', error);
+        logger.error('Failed to send verification email:', error);
       });
   }
 }

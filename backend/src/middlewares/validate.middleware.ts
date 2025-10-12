@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { ZodSchema } from 'zod';
+import { NextFunction, Request, Response } from 'express';
+import { ZodType } from 'zod';
 
 interface ValidationSchemas {
-  body?: ZodSchema;
-  query?: ZodSchema;
+  body?: ZodType;
+  query?: ZodType;
   // Note: params validation is not supported in middleware
 }
 

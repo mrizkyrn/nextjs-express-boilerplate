@@ -1,14 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
-import { userService } from '@/services/user.service';
-import { sendSuccess, sendSuccessWithPagination } from '@/helpers/response.helper';
-import type { GetUsersQuery, CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest } from '@/types/user.type';
+import { NextFunction, Request, Response } from 'express';
 import { getUserByIdSchema } from '@/schemas/user.schema';
+import { userService } from '@/services/user.service';
+import type { CreateUserRequest, GetUsersQueryParams, UpdatePasswordRequest, UpdateUserRequest } from '@/types/user.type';
+import { sendSuccess, sendSuccessWithPagination } from '@/utils/response.util';
 
 export class UserController {
   /**
-   * Get paginated list of users
+   * Get paginated list of users (admin only)
    */
-  async getUsers(req: Request<{}, {}, {}, GetUsersQuery>, res: Response, next: NextFunction): Promise<void> {
+  async getUsers(req: Request<{}, {}, {}, GetUsersQueryParams>, res: Response, next: NextFunction): Promise<void> {
     const { users, pagination } = await userService.getUsers(req.query);
     sendSuccessWithPagination(res, 200, 'Users retrieved successfully', users, pagination);
   }

@@ -3,17 +3,19 @@ import { authController } from '@/controller/auth.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { authLimiter } from '@/middlewares/rateLimiter.middleware';
 import { validate } from '@/middlewares/validate.middleware';
-import { asyncHandler } from '@/helpers/asyncHandler.helper';
 import {
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
-  forgotPasswordSchema,
+  resendVerificationSchema,
   resetPasswordSchema,
   verifyEmailSchema,
-  resendVerificationSchema,
 } from '@/schemas/auth.schema';
+import { asyncHandler } from '@/utils/asyncHandler.util';
 
 const router = Router();
+
+// ===== PUBLIC AUTH ROUTES =====
 
 /**
  * @route   POST /api/auth/register
@@ -35,20 +37,6 @@ router.post('/login', authLimiter, validate({ body: loginSchema }), asyncHandler
  * @access  Public
  */
 router.post('/refresh', asyncHandler(authController.refresh.bind(authController)));
-
-/**
- * @route   POST /api/auth/logout
- * @desc    Logout user and clear refresh token cookie
- * @access  Private
- */
-router.post('/logout', authenticate, asyncHandler(authController.logout.bind(authController)));
-
-/**
- * @route   GET /api/auth/me
- * @desc    Get current user profile
- * @access  Private
- */
-router.get('/me', authenticate, asyncHandler(authController.me.bind(authController)));
 
 /**
  * @route   POST /api/auth/verify-email
@@ -87,5 +75,21 @@ router.post(
  * @access  Public
  */
 router.post('/reset-password', authLimiter, validate({ body: resetPasswordSchema }), asyncHandler(authController.resetPassword.bind(authController)));
+
+// ===== PRIVATE AUTH ROUTES =====
+
+/**
+ * @route   POST /api/auth/logout
+ * @desc    Logout user and clear refresh token cookie
+ * @access  Private
+ */
+router.post('/logout', authenticate, asyncHandler(authController.logout.bind(authController)));
+
+/**
+ * @route   GET /api/auth/me
+ * @desc    Get current user profile
+ * @access  Private
+ */
+router.get('/me', authenticate, asyncHandler(authController.me.bind(authController)));
 
 export default router;

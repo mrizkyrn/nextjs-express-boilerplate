@@ -1,3 +1,4 @@
+import { APP_CONSTANTS } from '@/config/constants.config';
 import type { PaginationMeta } from '@/types/response.type';
 
 /**
@@ -33,12 +34,12 @@ export const calculateSkip = (page: number, limit: number): number => {
 /**
  * Validate and normalize pagination parameters
  * @param page - Page number (default: 1)
- * @param limit - Items per page (default: 10, max: 100)
+ * @param limit - Items per page
  * @returns Normalized pagination parameters
  */
 export const normalizePaginationParams = (page?: number | string, limit?: number | string): { page: number; limit: number } => {
   const normalizedPage = Math.max(1, Number(page) || 1);
-  const normalizedLimit = Math.min(100, Math.max(1, Number(limit) || 10));
+  const normalizedLimit = Math.min(APP_CONSTANTS.MAX_PAGE_SIZE, Math.max(1, Number(limit) || APP_CONSTANTS.DEFAULT_PAGE_SIZE));
 
   return {
     page: normalizedPage,

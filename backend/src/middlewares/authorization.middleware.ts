@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import { Permission } from '@/constants/permissions';
-import { UserRole } from '@/types/user.type';
-import { AuthenticatedUser } from '@/types/auth.type';
-import { userHasPermission, userHasAnyPermission, userHasAllPermissions } from '@/helpers/rbac.helper';
-import { AppError } from '@/helpers/error.helper';
-import { ERROR_CODES } from '@/constants/errorCodes.constant';
+import { NextFunction, Request, Response } from 'express';
+import { ERROR_CODES } from '@/config/error.config';
+import { Permission } from '@/config/rbac.config';
+import type { AuthenticatedUser } from '@/types/auth.type';
+import { AppError } from '@/utils/error.util';
+import { userHasAllPermissions, userHasAnyPermission, userHasPermission } from '@/utils/rbac.util';
+import { UserRole } from '@prisma/client';
 
 /**
  * Extend Express Request
