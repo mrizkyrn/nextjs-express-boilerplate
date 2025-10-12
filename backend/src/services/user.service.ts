@@ -1,9 +1,9 @@
 import { ERROR_CODES } from '@/config/error.config';
-import { userHelper } from '@/helpers/user.helper';
 import { prisma } from '@/libs/prisma.lib';
 import type { PaginationMeta } from '@/types/response.type';
 import type { CreateUserRequest, GetUsersQueryParams, UpdatePasswordRequest, UpdateUserRequest, UserResponse } from '@/types/user.type';
 import { AppError } from '@/utils/error.util';
+import { createUserResponse } from '@/utils/format.util';
 import { calculatePagination, calculateSkip, normalizePaginationParams } from '@/utils/pagination.util';
 import { comparePassword, hashPassword } from '@/utils/password.util';
 import { Prisma, UserRole } from '@prisma/client';
@@ -33,13 +33,20 @@ export class UserService {
         skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
-        select: userHelper.getUserSelect(),
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       }),
     ]);
 
     const pagination = calculatePagination(page, limit, total);
 
-    return { users: users.map(userHelper.createUserResponse), pagination };
+    return { users: users.map(createUserResponse), pagination };
   }
 
   /**
@@ -48,14 +55,21 @@ export class UserService {
   async getUserById(id: string): Promise<UserResponse> {
     const user = await prisma.user.findUnique({
       where: { id },
-      select: userHelper.getUserSelect(),
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     if (!user) {
       throw new AppError(404, 'User not found', ERROR_CODES.NOT_FOUND);
     }
 
-    return userHelper.createUserResponse(user);
+    return createUserResponse(user);
   }
 
   /**
@@ -84,10 +98,17 @@ export class UserService {
         name,
         role,
       },
-      select: userHelper.getUserSelect(),
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    return userHelper.createUserResponse(user);
+    return createUserResponse(user);
   }
 
   /**
@@ -118,10 +139,17 @@ export class UserService {
     const user = await prisma.user.update({
       where: { id },
       data,
-      select: userHelper.getUserSelect(),
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    return userHelper.createUserResponse(user);
+    return createUserResponse(user);
   }
 
   /**

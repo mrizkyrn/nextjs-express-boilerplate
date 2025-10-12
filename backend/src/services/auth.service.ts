@@ -2,7 +2,6 @@ import { APP_CONSTANTS } from '@/config/constants.config';
 import { env } from '@/config/environment.config';
 import { ERROR_CODES } from '@/config/error.config';
 import { DEFAULT_USER_ROLE } from '@/config/rbac.config';
-import { authHelper } from '@/helpers/auth.helper';
 import { logger } from '@/libs/logger.lib';
 import { prisma } from '@/libs/prisma.lib';
 import { emailService } from '@/services/email.service';
@@ -16,8 +15,10 @@ import type {
 } from '@/types/auth.type';
 import type { UserResponse } from '@/types/user.type';
 import { AppError } from '@/utils/error.util';
+import { createUserResponse } from '@/utils/format.util';
 import { generateTokenPair, verifyRefreshToken } from '@/utils/jwt.util';
 import { comparePassword, hashPassword } from '@/utils/password.util';
+import { calculateTokenExpiry, generateSecureToken } from '@/utils/token.utils';
 
 export class AuthService {
   /**
@@ -39,8 +40,8 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     // Generate email verification token
-    const verificationToken = authHelper.generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
-    const verificationExpiry = authHelper.calculateTokenExpiry(APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES); // 24 hours
+    const verificationToken = generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
+    const verificationExpiry = calculateTokenExpiry(APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES); // 24 hours
 
     // Hash verification token before storing
     const hashedVerificationToken = await hashPassword(verificationToken);
@@ -59,7 +60,7 @@ export class AuthService {
     });
 
     // Generate verification URL
-    const verifyUrl = authHelper.generateVerifyEmailUrl(verificationToken);
+    const verifyUrl = `${env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
     // Send verification email (non-blocking)
     emailService
@@ -114,7 +115,7 @@ export class AuthService {
       data: { refreshToken: tokens.refreshToken },
     });
 
-    const user = authHelper.createUserResponse(foundUser);
+    const user = createUserResponse(foundUser);
 
     return { user, tokens };
   }
@@ -173,7 +174,7 @@ export class AuthService {
       return null;
     }
 
-    return authHelper.createUserResponse(user);
+    return createUserResponse(user);
   }
 
   /**
@@ -192,9 +193,24 @@ export class AuthService {
       return;
     }
 
+    // Check cooldown period
+    if (user.passwordResetIssuedAt) {
+      const timeSinceLastEmail = Date.now() - user.passwordResetIssuedAt.getTime();
+      const cooldownMs = APP_CONSTANTS.PASSWORD_RESET_COOLDOWN_MINUTES * 60 * 1000;
+
+      if (timeSinceLastEmail < cooldownMs) {
+        const remainingMinutes = Math.ceil((cooldownMs - timeSinceLastEmail) / (60 * 1000));
+        throw new AppError(
+          429,
+          `Please wait ${remainingMinutes} minute(s) before requesting another password reset`,
+          ERROR_CODES.RATE_LIMIT_EXCEEDED
+        );
+      }
+    }
+
     // Generate secure reset token
-    const resetToken = authHelper.generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
-    const resetTokenExpiry = authHelper.calculateTokenExpiry(APP_CONSTANTS.PASSWORD_RESET_EXPIRY_MINUTES); // 30 minutes
+    const resetToken = generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
+    const resetTokenExpiry = calculateTokenExpiry(APP_CONSTANTS.PASSWORD_RESET_EXPIRY_MINUTES); // 30 minutes
 
     // Store hashed token in database
     const hashedToken = await hashPassword(resetToken);
@@ -203,11 +219,12 @@ export class AuthService {
       data: {
         passwordResetToken: hashedToken,
         passwordResetExpiresAt: resetTokenExpiry,
+        passwordResetIssuedAt: new Date(),
       },
     });
 
     // Generate reset URL
-    const resetUrl = authHelper.generateResetPasswordUrl(resetToken);
+    const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     // Send password reset email (non-blocking)
     emailService
@@ -370,8 +387,8 @@ export class AuthService {
     }
 
     // Generate new verification token
-    const verificationToken = authHelper.generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
-    const verificationExpiry = authHelper.calculateTokenExpiry(APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES); // 24 hours
+    const verificationToken = generateSecureToken(APP_CONSTANTS.VERIFICATION_TOKEN_LENGTH);
+    const verificationExpiry = calculateTokenExpiry(APP_CONSTANTS.EMAIL_VERIFICATION_EXPIRY_MINUTES); // 24 hours
 
     // Hash verification token before storing
     const hashedVerificationToken = await hashPassword(verificationToken);
@@ -386,7 +403,7 @@ export class AuthService {
     });
 
     // Generate verification URL
-    const verifyUrl = authHelper.generateVerifyEmailUrl(verificationToken);
+    const verifyUrl = `${env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
     // Send verification email (non-blocking)
     emailService

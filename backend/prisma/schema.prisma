@@ -24,6 +24,7 @@ model User {
   refreshToken               String?
   passwordResetToken         String?   @unique
   passwordResetExpiresAt     DateTime?
+  passwordResetIssuedAt      DateTime?
   emailVerified              Boolean   @default(false)
   emailVerificationToken     String?   @unique
   emailVerificationExpiresAt DateTime?
