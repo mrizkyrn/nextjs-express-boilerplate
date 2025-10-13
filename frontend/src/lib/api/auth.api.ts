@@ -1,13 +1,14 @@
 import type {
-  AuthResponse,
+  ForgotPasswordRequest,
   LoginRequest,
+  LoginResponse,
   RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
+  ResetPasswordRequest,
   SuccessResponse,
   User,
-  ForgotPasswordRequest,
-  ResetPasswordRequest,
   VerifyEmailRequest,
-  ResendVerificationRequest,
 } from '@/lib/types';
 import { apiClient } from './axios';
 import { API_ENDPOINTS } from './endpoints';
@@ -18,18 +19,18 @@ import { API_ENDPOINTS } from './endpoints';
  */
 export const authApi = {
   /**
-   * Login user
+   * Register new user
    */
-  login: async (credentials: LoginRequest): Promise<SuccessResponse<AuthResponse>> => {
-    const response = await apiClient.post<SuccessResponse<AuthResponse>>(API_ENDPOINTS.AUTH.LOGIN, credentials);
+  register: async (data: RegisterRequest): Promise<SuccessResponse<RegisterResponse>> => {
+    const response = await apiClient.post<SuccessResponse<RegisterResponse>>(API_ENDPOINTS.AUTH.REGISTER, data);
     return response.data;
   },
 
   /**
-   * Register new user
+   * Login user
    */
-  register: async (data: RegisterRequest): Promise<SuccessResponse<{ email: string }>> => {
-    const response = await apiClient.post<SuccessResponse<{ email: string }>>(API_ENDPOINTS.AUTH.REGISTER, data);
+  login: async (credentials: LoginRequest): Promise<SuccessResponse<LoginResponse>> => {
+    const response = await apiClient.post<SuccessResponse<LoginResponse>>(API_ENDPOINTS.AUTH.LOGIN, credentials);
     return response.data;
   },
 

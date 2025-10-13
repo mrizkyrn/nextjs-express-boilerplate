@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
-import { Providers } from '@/providers';
+
+import { Providers } from '@/lib/providers';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -21,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('min-h-screen bg-background font-montserrat antialiased', montserrat.variable)}>
+      <body className={cn('bg-background font-montserrat min-h-screen antialiased', montserrat.variable)}>
         <Providers>{children}</Providers>
       </body>
     </html>

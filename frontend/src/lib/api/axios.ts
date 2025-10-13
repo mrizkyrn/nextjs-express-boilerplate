@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from './endpoints';
+
 import { useAuthStore } from '@/lib/stores/authStore';
+import { API_BASE_URL, API_ENDPOINTS } from './endpoints';
 
 /**
  * Axios instance with interceptors for authentication

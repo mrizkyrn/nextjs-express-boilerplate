@@ -1,7 +1,8 @@
-import { Suspense } from 'react';
 import { Metadata } from 'next';
-import { Card } from '@/components/ui/Card';
+import { Suspense } from 'react';
+
 import { ResetPasswordForm } from '@/components/forms/ResetPasswordForm';
+import { Card } from '@/components/ui/Card';
 
 export const metadata: Metadata = {
   title: 'Reset Password',
@@ -27,17 +28,15 @@ export default function ResetPasswordPage({ searchParams }: ResetPasswordPagePro
           {token ? (
             <Suspense
               fallback={
-                <div className="animate-pulse space-y-4">
-                  <div className="h-10 bg-gray-200 rounded" />
-                  <div className="h-10 bg-gray-200 rounded" />
-                  <div className="h-10 bg-gray-200 rounded" />
+                <div className="py-8 text-center">
+                  <p className="text-muted-foreground">Loading...</p>
                 </div>
               }
             >
-              <ResetPasswordForm token={token} />
+              <ResetPasswordForm token={'token'} />
             </Suspense>
           ) : (
-            <div className="text-center py-8">
+            <div className="py-8 text-center">
               <p className="text-destructive">Invalid or missing reset token</p>
             </div>
           )}

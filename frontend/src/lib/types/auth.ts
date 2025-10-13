@@ -17,12 +17,16 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface RegisterResponse {
+  email: string;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
 }
 
-export interface AuthResponse {
+export interface LoginResponse {
   user: User;
   accessToken: string;
 }

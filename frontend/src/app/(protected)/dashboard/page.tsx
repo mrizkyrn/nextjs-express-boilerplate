@@ -1,14 +1,10 @@
 'use client';
 
-import { useAuth } from '@/lib/hooks/useAuth';
-import { useLogout } from '@/lib/hooks/useAuthMutations';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useLogout } from '@/lib/hooks/useAuthMutations';
 
-/**
- * Dashboard Page - Protected Route
- * Shows user information and provides logout functionality
- */
 export default function DashboardPage() {
   const { user } = useAuth();
   const logout = useLogout();
@@ -38,21 +34,21 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {user && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Name</label>
+                <label className="text-muted-foreground text-sm font-medium">Name</label>
                 <p className="text-lg font-semibold">{user.name}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Email</label>
+                <label className="text-muted-foreground text-sm font-medium">Email</label>
                 <p className="text-lg font-semibold">{user.email}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Role</label>
+                <label className="text-muted-foreground text-sm font-medium">Role</label>
                 <p className="text-lg font-semibold capitalize">{user.role}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Account Status</label>
+                <label className="text-muted-foreground text-sm font-medium">Account Status</label>
                 <p className="text-lg font-semibold text-green-600">Active</p>
               </div>
             </div>
@@ -67,16 +63,16 @@ export default function DashboardPage() {
           <CardDescription>Common tasks and navigation options.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Button variant="outline" className="flex h-20 flex-col items-center justify-center space-y-2">
               <span className="text-2xl">📊</span>
               <span>Analytics</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+            <Button variant="outline" className="flex h-20 flex-col items-center justify-center space-y-2">
               <span className="text-2xl">⚙️</span>
               <span>Settings</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+            <Button variant="outline" className="flex h-20 flex-col items-center justify-center space-y-2">
               <span className="text-2xl">📝</span>
               <span>Reports</span>
             </Button>

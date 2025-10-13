@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Card } from '@/components/ui/Card';
+
 import { ForgotPasswordForm } from '@/components/forms/ForgotPasswordForm';
+import { Card } from '@/components/ui/Card';
 
 export const metadata: Metadata = {
   title: 'Forgot Password',
@@ -21,7 +22,7 @@ export default function ForgotPasswordPage() {
           <ForgotPasswordForm />
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-4">
+        <p className="text-muted-foreground mt-4 text-center text-sm">
           Remember your password?{' '}
           <Link href="/login" className="text-primary hover:underline">
             Sign in

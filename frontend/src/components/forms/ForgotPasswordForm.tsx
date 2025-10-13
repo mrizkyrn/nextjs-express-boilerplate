@@ -1,21 +1,25 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
-import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/authSchema';
 import { useForgotPassword } from '@/lib/hooks/useAuthMutations';
+import { useCooldown } from '@/lib/hooks/useCooldown';
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/authSchema';
 
-/**
- * Forgot Password Form Component
- * Handles password reset request
- */
+const FORGOT_PASSWORD_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes
+
 export function ForgotPasswordForm() {
   const { mutate: forgotPassword, isPending } = useForgotPassword();
+
+  const cooldown = useCooldown({
+    key: 'forgot_password_resend_time',
+    duration: FORGOT_PASSWORD_COOLDOWN_MS,
+  });
 
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -25,7 +29,10 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = (data: ForgotPasswordFormData) => {
-    forgotPassword(data);
+    if (!cooldown.isActive) {
+      cooldown.start();
+      forgotPassword(data);
+    }
   };
 
   return (
@@ -48,7 +55,14 @@ export function ForgotPasswordForm() {
         </div>
 
         <div className="space-y-4">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          {cooldown.isActive && (
+            <p className="text-muted-foreground text-center text-sm">
+              You can request another reset in{' '}
+              <span className="text-foreground font-mono font-medium">{cooldown.formatTime(cooldown.timeLeft)}</span>
+            </p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isPending || cooldown.isActive}>
             {isPending ? 'Sending...' : 'Send Reset Link'}
           </Button>
 

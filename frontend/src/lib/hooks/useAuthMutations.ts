@@ -1,21 +1,60 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
 
 import { authApi } from '@/lib/api/auth.api';
-import { useAuthStore } from '@/lib/stores/authStore';
 import { queryKeys } from '@/lib/api/queryKeys';
+import { useAuthStore } from '@/lib/stores/authStore';
+import type { ErrorResponse, SuccessResponse } from '@/lib/types/api';
 import type {
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
   ForgotPasswordRequest,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
   ResetPasswordRequest,
   VerifyEmailRequest,
-  ResendVerificationRequest,
 } from '@/lib/types/auth';
-import type { ErrorResponse, SuccessResponse } from '@/lib/types/api';
+
+/**
+ * Hook for user registration
+ * @returns Mutation object with register function and state
+ */
+export const useRegister = () => {
+  const router = useRouter();
+
+  return useMutation<SuccessResponse<RegisterResponse>, AxiosError<ErrorResponse>, RegisterRequest>({
+    mutationFn: async (data: RegisterRequest): Promise<SuccessResponse<RegisterResponse>> => {
+      return await authApi.register(data);
+    },
+    onSuccess: (apiResponse) => {
+      const { data, message } = apiResponse;
+
+      // Use API success message for better UX
+      toast.success(message, {
+        description: `Please check ${data?.email} for verification email`,
+      });
+
+      // Navigate to verify-email page with email as query param
+      router.push(`/verify-email?email=${encodeURIComponent(data?.email || '')}`);
+    },
+    onError: (error) => {
+      const errorMessage = error?.response?.data?.message || 'Unable to create account. Please try again.';
+
+      toast.error('Registration failed', {
+        description: errorMessage,
+      });
+
+      // Log error for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Registration error:', error);
+      }
+    },
+    retry: false, // Don't retry auth requests
+  });
+};
 
 /**
  * Hook for user login
@@ -26,8 +65,8 @@ export const useLogin = () => {
   const setAuth = useAuthStore((state) => state.setAuth);
   const queryClient = useQueryClient();
 
-  return useMutation<SuccessResponse<AuthResponse>, AxiosError<ErrorResponse>, LoginRequest>({
-    mutationFn: async (credentials: LoginRequest): Promise<SuccessResponse<AuthResponse>> => {
+  return useMutation<SuccessResponse<LoginResponse>, AxiosError<ErrorResponse>, LoginRequest>({
+    mutationFn: async (credentials: LoginRequest): Promise<SuccessResponse<LoginResponse>> => {
       return await authApi.login(credentials);
     },
     onSuccess: (response) => {
@@ -57,44 +96,6 @@ export const useLogin = () => {
       // Log error for debugging (remove in production or use proper logging service)
       if (process.env.NODE_ENV === 'development') {
         console.error('Login error:', error);
-      }
-    },
-    retry: false, // Don't retry auth requests
-  });
-};
-
-/**
- * Hook for user registration
- * @returns Mutation object with register function and state
- */
-export const useRegister = () => {
-  const router = useRouter();
-
-  return useMutation<SuccessResponse<{ email: string }>, AxiosError<ErrorResponse>, RegisterRequest>({
-    mutationFn: async (data: RegisterRequest): Promise<SuccessResponse<{ email: string }>> => {
-      return await authApi.register(data);
-    },
-    onSuccess: (apiResponse) => {
-      const { data, message } = apiResponse;
-
-      // Use API success message for better UX
-      toast.success(message, {
-        description: `Please check ${data?.email} for verification email`,
-      });
-
-      // Navigate to verify-email page with email as query param
-      router.push(`/verify-email?email=${encodeURIComponent(data?.email || '')}`);
-    },
-    onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Unable to create account. Please try again.';
-
-      toast.error('Registration failed', {
-        description: errorMessage,
-      });
-
-      // Log error for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Registration error:', error);
       }
     },
     retry: false, // Don't retry auth requests
@@ -224,8 +225,6 @@ export const useResendVerification = () => {
  * @returns Mutation object with forgotPassword function and state
  */
 export const useForgotPassword = () => {
-  const router = useRouter();
-
   return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, ForgotPasswordRequest>({
     mutationFn: async (data: ForgotPasswordRequest): Promise<SuccessResponse<null>> => {
       return await authApi.forgotPassword(data);
@@ -236,9 +235,6 @@ export const useForgotPassword = () => {
       toast.success(message, {
         description: 'Please check your email for instructions',
       });
-
-      // Navigate to a confirmation page or back to login
-      router.push('/login');
     },
     onError: (error) => {
       const errorMessage = error?.response?.data?.message || 'Failed to process password reset request';

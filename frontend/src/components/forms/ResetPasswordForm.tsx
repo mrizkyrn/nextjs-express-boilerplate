@@ -1,22 +1,18 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
-import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/schemas/authSchema';
 import { useResetPassword } from '@/lib/hooks/useAuthMutations';
+import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/schemas/authSchema';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface ResetPasswordFormProps {
   token: string;
 }
 
-/**
- * Reset Password Form Component
- * Handles password reset with token
- */
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const { mutate: resetPassword, isPending } = useResetPassword();
 

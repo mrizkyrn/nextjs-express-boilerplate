@@ -1,17 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { CheckCircle2, Loader2, Mail, XCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Mail, CheckCircle2, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { useVerifyEmail, useResendVerification } from '@/lib/hooks/useAuthMutations';
+import { useResendVerification, useVerifyEmail } from '@/lib/hooks/useAuthMutations';
+import { useCooldown } from '@/lib/hooks/useCooldown';
 
-/**
- * Verify Email Component
- * Handles email verification with token from URL
- */
+const RESEND_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes
+
 export function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,6 +22,11 @@ export function VerifyEmailForm() {
   const { mutate: verifyEmail, isPending: isVerifying, isSuccess, isError } = useVerifyEmail();
   const { mutate: resendVerification, isPending: isResending } = useResendVerification();
 
+  const cooldown = useCooldown({
+    key: 'email_verification_resend_time',
+    duration: RESEND_COOLDOWN_MS,
+  });
+
   useEffect(() => {
     // Automatically verify if token is present and not already attempted
     if (token && !verificationAttempted) {
@@ -32,7 +36,8 @@ export function VerifyEmailForm() {
   }, [token, verificationAttempted, verifyEmail]);
 
   const handleResend = () => {
-    if (email) {
+    if (email && !cooldown.isActive) {
+      cooldown.start();
       resendVerification({ email });
     }
   };
@@ -41,8 +46,8 @@ export function VerifyEmailForm() {
   if (isVerifying) {
     return (
       <Card className="p-8 text-center">
-        <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-        <h2 className="text-2xl font-bold mb-2">Verifying Email</h2>
+        <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
+        <h2 className="mb-2 text-2xl font-bold">Verifying Email</h2>
         <p className="text-muted-foreground">Please wait while we verify your email address...</p>
       </Card>
     );
@@ -52,8 +57,8 @@ export function VerifyEmailForm() {
   if (isSuccess) {
     return (
       <Card className="p-8 text-center">
-        <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500" />
-        <h2 className="text-2xl font-bold mb-2">Email Verified!</h2>
+        <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-green-500" />
+        <h2 className="mb-2 text-2xl font-bold">Email Verified!</h2>
         <p className="text-muted-foreground mb-6">Your email has been successfully verified.</p>
         <Button onClick={() => router.push('/login')} className="w-full">
           Go to Login
@@ -66,13 +71,26 @@ export function VerifyEmailForm() {
   if (isError && token) {
     return (
       <Card className="p-8 text-center">
-        <XCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-        <h2 className="text-2xl font-bold mb-2">Verification Failed</h2>
+        <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
+        <h2 className="mb-2 text-2xl font-bold">Verification Failed</h2>
         <p className="text-muted-foreground mb-6">The verification link is invalid or has expired.</p>
         {email && (
-          <Button onClick={handleResend} disabled={isResending} className="w-full" variant="outline">
-            {isResending ? 'Sending...' : 'Resend Verification Email'}
-          </Button>
+          <div className="space-y-4">
+            {cooldown.isActive && (
+              <p className="text-muted-foreground text-sm">
+                You can resend in{' '}
+                <span className="text-foreground font-mono font-medium">{cooldown.formatTime(cooldown.timeLeft)}</span>
+              </p>
+            )}
+            <Button
+              onClick={handleResend}
+              disabled={isResending || cooldown.isActive}
+              className="w-full"
+              variant="outline"
+            >
+              {isResending ? 'Sending...' : 'Resend Verification Email'}
+            </Button>
+          </div>
         )}
       </Card>
     );
@@ -81,15 +99,29 @@ export function VerifyEmailForm() {
   // Show waiting for verification (no token in URL)
   return (
     <Card className="p-8 text-center">
-      <Mail className="w-12 h-12 mx-auto mb-4 text-primary" />
-      <h2 className="text-2xl font-bold mb-2">Check Your Email</h2>
+      <Mail className="text-primary mx-auto mb-4 h-12 w-12" />
+      <h2 className="mb-2 text-2xl font-bold">Check Your Email</h2>
       <p className="text-muted-foreground mb-6">
-        We&apos;ve sent a verification link to <strong>{email}</strong>. Please click the link in the email to verify your account.
+        We&apos;ve sent a verification link to <strong>{email}</strong>. Please click the link in the email to verify
+        your account.
       </p>
 
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">Didn&apos;t receive the email?</p>
-        <Button onClick={handleResend} disabled={isResending || !email} className="w-full" variant="outline">
+        <p className="text-muted-foreground text-sm">Didn&apos;t receive the email?</p>
+
+        {cooldown.isActive && (
+          <p className="text-muted-foreground text-sm">
+            You can resend in{' '}
+            <span className="text-foreground font-mono font-medium">{cooldown.formatTime(cooldown.timeLeft)}</span>
+          </p>
+        )}
+
+        <Button
+          onClick={handleResend}
+          disabled={isResending || cooldown.isActive || !email}
+          className="w-full"
+          variant="outline"
+        >
           {isResending ? 'Sending...' : 'Resend Verification Email'}
         </Button>
       </div>
