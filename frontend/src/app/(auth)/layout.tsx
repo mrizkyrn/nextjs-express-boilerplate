@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { Loading } from '@/components/ui/Loading';
 import { useAuthStore } from '@/lib/stores/authStore';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -18,14 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   // Show loading while checking auth state
   if (!_hasHydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <Loading variant="fullscreen" message="Checking authentication..." />;
   }
 
   // Don't render children if authenticated (will redirect)
@@ -33,5 +27,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800">
+      {children}
+    </div>
+  );
 }

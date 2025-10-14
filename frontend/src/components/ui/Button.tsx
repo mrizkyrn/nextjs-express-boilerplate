@@ -2,6 +2,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
+import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils/index';
 
 const buttonVariants = cva(
@@ -34,19 +35,51 @@ const buttonVariants = cva(
   }
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : 'button';
-
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
 }
+
+/**
+ * A customizable button component with loading states and multiple variants.
+ *
+ * @example
+ * <Button>Click me</Button>
+ * <Button variant="destructive" isLoading>Delete</Button>
+ * <Button asChild><Link href="/page">Navigate</Link></Button>
+ */
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { className, variant, size, asChild = false, isLoading = false, loadingText, children, disabled, ...props },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : 'button';
+    const isDisabled = disabled || isLoading;
+    const buttonClassName = cn(buttonVariants({ variant, size, className }));
+
+    const content = React.useMemo(() => {
+      if (isLoading) {
+        return (
+          <>
+            <Spinner aria-hidden="true" />
+            {loadingText || 'Loading...'}
+          </>
+        );
+      }
+      return children;
+    }, [isLoading, loadingText, children]);
+
+    return (
+      <Comp ref={ref} data-slot="button" className={buttonClassName} disabled={isDisabled} {...props}>
+        {content}
+      </Comp>
+    );
+  }
+);
+
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };

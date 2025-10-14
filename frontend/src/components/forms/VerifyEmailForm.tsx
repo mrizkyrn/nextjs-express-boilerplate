@@ -1,14 +1,18 @@
 'use client';
 
-import { CheckCircle2, Loader2, Mail, XCircle } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Error, ErrorContent, ErrorDescription, ErrorHeader, ErrorMedia, ErrorTitle } from '@/components/ui/Error';
+import { Loading } from '@/components/ui/Loading';
+import { SuccessState } from '@/components/ui/Success';
 import { useResendVerification, useVerifyEmail } from '@/lib/hooks/useAuthMutations';
 import { useCooldown } from '@/lib/hooks/useCooldown';
 
+const RESEND_COOLDOWN_KEY = 'email_verification_resend_time';
 const RESEND_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes
 
 export function VerifyEmailForm() {
@@ -23,7 +27,7 @@ export function VerifyEmailForm() {
   const { mutate: resendVerification, isPending: isResending } = useResendVerification();
 
   const cooldown = useCooldown({
-    key: 'email_verification_resend_time',
+    key: RESEND_COOLDOWN_KEY,
     duration: RESEND_COOLDOWN_MS,
   });
 
@@ -46,9 +50,7 @@ export function VerifyEmailForm() {
   if (isVerifying) {
     return (
       <Card className="p-8 text-center">
-        <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
-        <h2 className="mb-2 text-2xl font-bold">Verifying Email</h2>
-        <p className="text-muted-foreground">Please wait while we verify your email address...</p>
+        <Loading message="Verifying your email address..." />
       </Card>
     );
   }
@@ -56,26 +58,31 @@ export function VerifyEmailForm() {
   // Show success state
   if (isSuccess) {
     return (
-      <Card className="p-8 text-center">
-        <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-green-500" />
-        <h2 className="mb-2 text-2xl font-bold">Email Verified!</h2>
-        <p className="text-muted-foreground mb-6">Your email has been successfully verified.</p>
-        <Button onClick={() => router.push('/login')} className="w-full">
-          Go to Login
-        </Button>
-      </Card>
+      <SuccessState
+        title="Email Verified!"
+        description="Your email has been successfully verified."
+        action={
+          <Button onClick={() => router.push('/login')} className="w-full">
+            Go to Login
+          </Button>
+        }
+      />
     );
   }
 
   // Show error state with resend option
   if (isError && token) {
     return (
-      <Card className="p-8 text-center">
-        <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
-        <h2 className="mb-2 text-2xl font-bold">Verification Failed</h2>
-        <p className="text-muted-foreground mb-6">The verification link is invalid or has expired.</p>
+      <Error>
+        <ErrorHeader>
+          <ErrorMedia>
+            <Mail />
+          </ErrorMedia>
+          <ErrorTitle>Verification Failed</ErrorTitle>
+          <ErrorDescription>The verification link is invalid or has expired.</ErrorDescription>
+        </ErrorHeader>
         {email && (
-          <div className="space-y-4">
+          <ErrorContent>
             {cooldown.isActive && (
               <p className="text-muted-foreground text-sm">
                 You can resend in{' '}
@@ -90,40 +97,51 @@ export function VerifyEmailForm() {
             >
               {isResending ? 'Sending...' : 'Resend Verification Email'}
             </Button>
-          </div>
+          </ErrorContent>
         )}
-      </Card>
+      </Error>
     );
   }
 
   // Show waiting for verification (no token in URL)
   return (
-    <Card className="p-8 text-center">
-      <Mail className="text-primary mx-auto mb-4 h-12 w-12" />
-      <h2 className="mb-2 text-2xl font-bold">Check Your Email</h2>
-      <p className="text-muted-foreground mb-6">
-        We&apos;ve sent a verification link to <strong>{email}</strong>. Please click the link in the email to verify
-        your account.
-      </p>
+    <Card className="p-8">
+      <div className="space-y-6 text-center">
+        {/* Header */}
+        <div className="space-y-4">
+          <div className="bg-primary/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+            <Mail className="text-primary h-6 w-6" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold">Check your email</h1>
+            <p className="text-muted-foreground text-sm">
+              We sent a verification link to <span className="font-medium">{email}</span>
+            </p>
+          </div>
+        </div>
 
-      <div className="space-y-4">
-        <p className="text-muted-foreground text-sm">Didn&apos;t receive the email?</p>
+        {/* Resend Section */}
+        <div className="space-y-4">
+          {cooldown.isActive ? (
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2 text-sm">Resend available in</p>
+              <p className="text-primary font-mono text-lg font-semibold">{cooldown.formatTime(cooldown.timeLeft)}</p>
+            </div>
+          ) : (
+            <Button onClick={handleResend} disabled={isResending || !email} className="w-full" variant="outline">
+              {isResending ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Sending...
+                </div>
+              ) : (
+                'Resend email'
+              )}
+            </Button>
+          )}
 
-        {cooldown.isActive && (
-          <p className="text-muted-foreground text-sm">
-            You can resend in{' '}
-            <span className="text-foreground font-mono font-medium">{cooldown.formatTime(cooldown.timeLeft)}</span>
-          </p>
-        )}
-
-        <Button
-          onClick={handleResend}
-          disabled={isResending || cooldown.isActive || !email}
-          className="w-full"
-          variant="outline"
-        >
-          {isResending ? 'Sending...' : 'Resend Verification Email'}
-        </Button>
+          <p className="text-muted-foreground text-center text-xs">Didn&apos;t receive it? Check your spam folder</p>
+        </div>
       </div>
     </Card>
   );

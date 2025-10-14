@@ -8,8 +8,7 @@ import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
-import { Input } from '@/components/ui/Input';
-import { Spinner } from '@/components/ui/Spinner';
+import { Input, PasswordInput } from '@/components/ui/Input';
 import { useLogin } from '@/lib/hooks/useAuthMutations';
 import { loginSchema, type LoginFormData } from '@/lib/schemas/authSchema';
 
@@ -29,72 +28,59 @@ export function LoginForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Mail className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
                   <Input
                     type="email"
                     placeholder="you@example.com"
-                    className="pl-9"
+                    icon={<Mail className="h-4 w-4" />}
                     disabled={login.isPending}
                     autoComplete="email"
                     aria-invalid={!!fieldState.error}
                     {...field}
                   />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    type="password"
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
                     placeholder="••••••••"
-                    className="pl-9"
+                    icon={<Lock className="h-4 w-4" />}
                     disabled={login.isPending}
                     autoComplete="current-password"
                     aria-invalid={!!fieldState.error}
                     {...field}
                   />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <div className="flex items-center justify-end">
-          <Link href="/forgot-password" className="text-primary text-sm hover:underline">
+          <Link href="/forgot-password" className="text-sm no-underline hover:underline">
             Forgot password?
           </Link>
         </div>
 
-        <Button type="submit" className="w-full" disabled={login.isPending}>
-          {login.isPending ? (
-            <>
-              <Spinner aria-hidden="true" />
-              Logging in...
-            </>
-          ) : (
-            'Login'
-          )}
+        <Button type="submit" className="w-full" isLoading={login.isPending} loadingText="Logging in...">
+          Login
         </Button>
       </form>
     </Form>

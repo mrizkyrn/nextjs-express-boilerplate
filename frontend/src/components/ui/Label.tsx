@@ -5,17 +5,19 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils/index';
 
+const labelBaseClasses =
+  'flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50';
+
+/**
+ * A label component that provides accessible form labels.
+ * Automatically associates with form controls using the `htmlFor` prop.
+ *
+ * @example
+ * <Label htmlFor="email">Email Address</Label>
+ * <Input id="email" type="email" />
+ */
 function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
-  return (
-    <LabelPrimitive.Root
-      data-slot="label"
-      className={cn(
-        'flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50',
-        className
-      )}
-      {...props}
-    />
-  );
+  return <LabelPrimitive.Root data-slot="label" className={cn(labelBaseClasses, className)} {...props} />;
 }
 
 export { Label };

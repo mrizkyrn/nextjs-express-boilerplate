@@ -1,8 +1,22 @@
 'use client';
 
 import { useTheme } from 'next-themes';
+import * as React from 'react';
 import { Toaster as Sonner, ToasterProps } from 'sonner';
 
+/**
+ * Toast notification component powered by Sonner.
+ * Automatically adapts to the current theme.
+ *
+ * @example
+ * // Add to root layout
+ * <Toaster />
+ *
+ * // Use in components
+ * import { toast } from 'sonner';
+ * toast.success('Operation successful!');
+ * toast.error('Something went wrong');
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();
 

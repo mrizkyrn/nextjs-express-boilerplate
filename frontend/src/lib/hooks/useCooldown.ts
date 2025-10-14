@@ -13,12 +13,6 @@ interface UseCooldownReturn {
   formatTime: (ms: number) => string;
 }
 
-/**
- * Custom hook for managing cooldown timers with localStorage persistence
- * @param key - Unique key for localStorage
- * @param duration - Cooldown duration in milliseconds
- * @returns Object with cooldown state and helper functions
- */
 export function useCooldown({ key, duration }: UseCooldownOptions): UseCooldownReturn {
   const [timeLeft, setTimeLeft] = useState(0);
 

@@ -21,8 +21,8 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back! Here&apos;s your account overview.</p>
         </div>
-        <Button onClick={handleLogout} variant="outline" disabled={logout.isPending}>
-          {logout.isPending ? 'Logging out...' : 'Logout'}
+        <Button onClick={handleLogout} variant="outline" isLoading={logout.isPending} loadingText="Logging out...">
+          Logout
         </Button>
       </div>
 

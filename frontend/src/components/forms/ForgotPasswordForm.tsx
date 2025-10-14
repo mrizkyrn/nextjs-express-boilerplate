@@ -10,14 +10,16 @@ import { Input } from '@/components/ui/Input';
 import { useForgotPassword } from '@/lib/hooks/useAuthMutations';
 import { useCooldown } from '@/lib/hooks/useCooldown';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/authSchema';
+import { Mail } from 'lucide-react';
 
+const FORGOT_PASSWORD_KEY = 'forgot_password_resend_time';
 const FORGOT_PASSWORD_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes
 
 export function ForgotPasswordForm() {
   const { mutate: forgotPassword, isPending } = useForgotPassword();
 
   const cooldown = useCooldown({
-    key: 'forgot_password_resend_time',
+    key: FORGOT_PASSWORD_KEY,
     duration: FORGOT_PASSWORD_COOLDOWN_MS,
   });
 
@@ -46,7 +48,14 @@ export function ForgotPasswordForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Enter your email address" disabled={isPending} {...field} />
+                  <Input
+                    type="email"
+                    placeholder="Enter your email address"
+                    icon={<Mail className="h-4 w-4" />}
+                    disabled={isPending}
+                    autoComplete="email"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -62,14 +71,18 @@ export function ForgotPasswordForm() {
             </p>
           )}
 
-          <Button type="submit" className="w-full" disabled={isPending || cooldown.isActive}>
-            {isPending ? 'Sending...' : 'Send Reset Link'}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={cooldown.isActive}
+            isLoading={isPending}
+            loadingText="Sending..."
+          >
+            Send Reset Link
           </Button>
 
           <div className="text-center text-sm">
-            <Link href="/login" className="text-primary hover:underline">
-              Back to login
-            </Link>
+            <Link href="/login">Back to sign in</Link>
           </div>
         </div>
       </form>

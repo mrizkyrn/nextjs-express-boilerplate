@@ -11,24 +11,22 @@ export const metadata: Metadata = {
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Forgot Password</h1>
-          <p className="text-muted-foreground mt-2">Enter your email to receive a password reset link</p>
-        </div>
-
-        <Card className="p-6">
-          <ForgotPasswordForm />
-        </Card>
-
-        <p className="text-muted-foreground mt-4 text-center text-sm">
-          Remember your password?{' '}
-          <Link href="/login" className="text-primary hover:underline">
-            Sign in
-          </Link>
-        </p>
+    <div className="w-full max-w-md">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold">Forgot Password</h1>
+        <p className="text-muted-foreground mt-2">Enter your email to receive a password reset link</p>
       </div>
+
+      <Card className="p-6">
+        <ForgotPasswordForm />
+      </Card>
+
+      <p className="text-muted-foreground mt-4 text-center text-sm">
+        Remember your password?{' '}
+        <Link href="/login" className="font-medium">
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }

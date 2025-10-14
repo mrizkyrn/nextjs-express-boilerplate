@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
-import { Suspense } from 'react';
 
 import { ResetPasswordForm } from '@/components/forms/ResetPasswordForm';
 import { Card } from '@/components/ui/Card';
+import { ErrorState } from '@/components/ui/Error';
+import { SuspenseFormLoader } from '@/components/ui/SuspenseLoader';
 
 export const metadata: Metadata = {
   title: 'Reset Password',
@@ -17,31 +18,26 @@ export default function ResetPasswordPage({ searchParams }: ResetPasswordPagePro
   const token = searchParams.token;
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Reset Password</h1>
-          <p className="text-muted-foreground mt-2">Enter your new password below</p>
-        </div>
+    <div className="w-full max-w-md">
+      {token ? (
+        <>
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold">Reset Password</h1>
+            <p className="text-muted-foreground mt-2">Enter your new password below</p>
+          </div>
 
-        <Card className="p-6">
-          {token ? (
-            <Suspense
-              fallback={
-                <div className="py-8 text-center">
-                  <p className="text-muted-foreground">Loading...</p>
-                </div>
-              }
-            >
-              <ResetPasswordForm token={'token'} />
-            </Suspense>
-          ) : (
-            <div className="py-8 text-center">
-              <p className="text-destructive">Invalid or missing reset token</p>
-            </div>
-          )}
-        </Card>
-      </div>
+          <Card className="p-6">
+            <SuspenseFormLoader loadingMessage="Loading form...">
+              <ResetPasswordForm token={token} />
+            </SuspenseFormLoader>
+          </Card>
+        </>
+      ) : (
+        <ErrorState
+          title="Invalid or missing token"
+          description="The password reset token is missing or invalid. Please request a new password reset."
+        />
+      )}
     </div>
   );
 }

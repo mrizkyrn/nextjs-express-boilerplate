@@ -63,7 +63,6 @@ export const authApi = {
    */
   verifyEmail: async (data: VerifyEmailRequest): Promise<SuccessResponse<null>> => {
     const response = await apiClient.post<SuccessResponse<null>>(API_ENDPOINTS.AUTH.VERIFY_EMAIL, data);
-    console.log('API verifyEmail response:', response.data);
     return response.data;
   },
 

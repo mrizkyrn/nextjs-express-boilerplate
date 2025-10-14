@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
-import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/Input';
 import { useResetPassword } from '@/lib/hooks/useAuthMutations';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/schemas/authSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,7 +42,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <FormItem>
                 <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Enter new password" disabled={isPending} {...field} />
+                  <PasswordInput placeholder="Enter new password" disabled={isPending} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -56,7 +56,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Confirm new password" disabled={isPending} {...field} />
+                  <PasswordInput placeholder="Confirm new password" disabled={isPending} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -64,8 +64,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? 'Resetting...' : 'Reset Password'}
+        <Button type="submit" className="w-full" isLoading={isPending} loadingText="Resetting...">
+          Reset Password
         </Button>
       </form>
     </Form>

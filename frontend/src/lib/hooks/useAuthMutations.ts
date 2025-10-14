@@ -17,6 +17,7 @@ import type {
   ResetPasswordRequest,
   VerifyEmailRequest,
 } from '@/lib/types/auth';
+import { getErrorMessage, logError } from '@/lib/utils/errorHandler';
 
 /**
  * Hook for user registration
@@ -32,25 +33,24 @@ export const useRegister = () => {
     onSuccess: (apiResponse) => {
       const { data, message } = apiResponse;
 
-      // Use API success message for better UX
+      // Start cooldown immediately after registration
+      localStorage.setItem('email_verification_resend_time', Date.now().toString());
+
+      // Use API success message
       toast.success(message, {
-        description: `Please check ${data?.email} for verification email`,
+        description: `Please check ${data.email} for verification email`,
       });
 
       // Navigate to verify-email page with email as query param
-      router.push(`/verify-email?email=${encodeURIComponent(data?.email || '')}`);
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     },
     onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Unable to create account. Please try again.';
+      logError('Registration', error);
+      const errorMessage = getErrorMessage(error, 'Unable to create account. Please try again.');
 
       toast.error('Registration failed', {
         description: errorMessage,
       });
-
-      // Log error for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Registration error:', error);
-      }
     },
     retry: false, // Don't retry auth requests
   });
@@ -73,30 +73,26 @@ export const useLogin = () => {
       const { data, message } = response;
 
       // Update auth state with the data
-      setAuth(data!.user, data!.accessToken);
+      setAuth(data.user, data.accessToken);
 
       // Invalidate user queries to refetch fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
 
-      // Use API success message for better UX
+      // Use API success message
       toast.success(message, {
-        description: `Logged in as ${data!.user.email}`,
+        description: `Logged in as ${data.user.email}`,
       });
 
       // Navigate to dashboard
       router.push('/dashboard');
     },
     onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Invalid email or password';
+      logError('Login', error);
+      const errorMessage = getErrorMessage(error, 'Invalid email or password');
 
       toast.error('Login failed', {
         description: errorMessage,
       });
-
-      // Log error for debugging (remove in production or use proper logging service)
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Login error:', error);
-      }
     },
     retry: false, // Don't retry auth requests
   });
@@ -132,7 +128,7 @@ export const useLogout = () => {
       // Navigate to login
       router.push('/login');
     },
-    onError: (error) => {
+    onError: () => {
       // Even if logout fails on server, clear local state for security
       clearAuth();
       queryClient.clear();
@@ -143,11 +139,6 @@ export const useLogout = () => {
 
       // Navigate to login anyway
       router.push('/login');
-
-      // Log error for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Logout error:', error);
-      }
     },
     retry: false, // Don't retry logout
   });
@@ -175,15 +166,12 @@ export const useVerifyEmail = () => {
       router.push('/login');
     },
     onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Invalid or expired verification token';
+      logError('Email Verification', error);
+      const errorMessage = getErrorMessage(error, 'Invalid or expired verification token');
 
       toast.error('Verification failed', {
         description: errorMessage,
       });
-
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Verification error:', error);
-      }
     },
     retry: false,
   });
@@ -206,15 +194,12 @@ export const useResendVerification = () => {
       });
     },
     onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to resend verification email';
+      logError('Resend Verification', error);
+      const errorMessage = getErrorMessage(error, 'Failed to resend verification email');
 
       toast.error('Resend failed', {
         description: errorMessage,
       });
-
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Resend verification error:', error);
-      }
     },
     retry: false,
   });
@@ -237,15 +222,12 @@ export const useForgotPassword = () => {
       });
     },
     onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to process password reset request';
+      logError('Forgot Password', error);
+      const errorMessage = getErrorMessage(error, 'Failed to process password reset request');
 
       toast.error('Request failed', {
         description: errorMessage,
       });
-
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Forgot password error:', error);
-      }
     },
     retry: false,
   });
@@ -273,15 +255,12 @@ export const useResetPassword = () => {
       router.push('/login');
     },
     onError: (error) => {
-      const errorMessage = error?.response?.data?.message || 'Invalid or expired reset token';
+      logError('Password Reset', error);
+      const errorMessage = getErrorMessage(error, 'Invalid or expired reset token');
 
       toast.error('Password reset failed', {
         description: errorMessage,
       });
-
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Reset password error:', error);
-      }
     },
     retry: false,
   });
