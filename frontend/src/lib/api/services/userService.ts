@@ -5,6 +5,7 @@ import type {
   UpdatePasswordRequest,
   UpdateUserRequest,
   User,
+  UserResponse,
   UserStats,
 } from '@/lib/types';
 import { apiClient } from '../client/axios';
@@ -15,8 +16,8 @@ export const userApi = {
   /**
    * Get paginated list of users (admin only)
    */
-  getUsers: async (params?: GetUsersParams): Promise<SuccessResponse<User[]>> => {
-    const response = await apiClient.get<SuccessResponse<User[]>>(USERS_BASE, { params });
+  getUsers: async (params?: GetUsersParams): Promise<SuccessResponse<UserResponse[]>> => {
+    const response = await apiClient.get<SuccessResponse<UserResponse[]>>(USERS_BASE, { params });
     return response.data;
   },
 

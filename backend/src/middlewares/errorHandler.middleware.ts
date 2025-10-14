@@ -1,31 +1,40 @@
-import { NextFunction, Request, Response } from 'express';
-import { ZodError } from 'zod';
 import { ERROR_CODES } from '@/config/error.config';
-import { logger } from '@/libs/logger.lib';
+import { logError, logWarn } from '@/libs/logger.lib';
 import type { ErrorDetail, ErrorResponse } from '@/types/response.type';
 import { AppError } from '@/utils/error.util';
 import { sendErrorResponse } from '@/utils/response.util';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { NextFunction, Request, Response } from 'express';
+import { ZodError } from 'zod';
 
 /**
  * Global error handler middleware
  * Handles all errors thrown in the application
  */
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  // Log error with full context
-  logger.error('Error occurred', {
-    error: {
-      name: err.name,
+  // Determine log level based on error type
+  const isClientError = err instanceof AppError && err.statusCode < 500;
+  const isValidationError = err instanceof ZodError;
+
+  // Log with appropriate level
+  if (isClientError || isValidationError) {
+    // Client errors and validation errors - log as warning (user mistakes, not system issues)
+    logWarn('Client error occurred', {
+      error: err.name,
       message: err.message,
-      stack: err.stack,
-    },
-    request: {
-      method: req.method,
       url: req.originalUrl,
+      method: req.method,
+      ip: req.ip,
+    });
+  } else {
+    // Server errors - log as error (system issues)
+    logError('Server error occurred', err, {
+      url: req.originalUrl,
+      method: req.method,
       ip: req.ip,
       userAgent: req.get('user-agent'),
-    },
-  });
+    });
+  }
 
   // Handle Zod validation errors
   if (err instanceof ZodError) {

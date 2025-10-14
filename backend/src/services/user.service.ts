@@ -14,12 +14,13 @@ export class UserService {
    */
   async getUsers(query: GetUsersQueryParams): Promise<{ users: UserResponse[]; pagination: PaginationMeta }> {
     const { page, limit } = normalizePaginationParams(query.page, query.limit);
-    const { search, role, sortBy = 'createdAt', sortOrder = 'desc' } = query;
+    const { search, role, emailVerified, sortBy = 'createdAt', sortOrder = 'desc' } = query;
     const skip = calculateSkip(page, limit);
 
     // Build where clause for filtering
     const where: Prisma.UserWhereInput = {
       ...(role && { role }),
+      ...(emailVerified !== undefined && { emailVerified }),
       ...(search && {
         OR: [{ name: { contains: search, mode: 'insensitive' } }, { email: { contains: search, mode: 'insensitive' } }],
       }),
@@ -38,6 +39,7 @@ export class UserService {
           email: true,
           name: true,
           role: true,
+          emailVerified: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -60,6 +62,7 @@ export class UserService {
         email: true,
         name: true,
         role: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -103,6 +106,7 @@ export class UserService {
         email: true,
         name: true,
         role: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -144,6 +148,7 @@ export class UserService {
         email: true,
         name: true,
         role: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
       },

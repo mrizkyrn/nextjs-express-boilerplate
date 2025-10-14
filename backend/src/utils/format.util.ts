@@ -11,6 +11,7 @@ export const createUserResponse = (user: any): UserResponse => {
     email: user.email,
     name: user.name,
     role: user.role,
+    emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

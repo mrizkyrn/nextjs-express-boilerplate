@@ -24,22 +24,10 @@ export interface SuccessResponse<T = unknown> {
   pagination?: PaginationMeta;
 }
 
-export interface SuccessResponseWithData<T> {
-  success: true;
-  message: string;
-  data: T;
-  pagination?: PaginationMeta;
-}
-
-export interface SuccessResponseWithoutData {
-  success: true;
-  message: string;
-}
-
 export interface ErrorResponse {
   success: false;
   message: string;
   error: ErrorObject;
 }
 
-export type ApiResponse<T = never> = T extends never ? SuccessResponseWithoutData | ErrorResponse : SuccessResponseWithData<T> | ErrorResponse;
+export type ApiResponse<T = unknown> = SuccessResponse<T> | ErrorResponse;

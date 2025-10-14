@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 import { useAuthStore } from '@/lib/stores/authStore';
+import { RefreshTokenResponse, SuccessResponse } from '@/lib/types';
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -96,9 +97,9 @@ apiClient.interceptors.response.use(
 
     try {
       // Call refresh endpoint (httpOnly cookie sent automatically)
-      const response = await apiClient.post<{ accessToken: string }>('/auth/refresh');
+      const response = await apiClient.post<SuccessResponse<RefreshTokenResponse>>('/auth/refresh');
 
-      const { accessToken } = response.data;
+      const { accessToken } = response.data.data;
 
       // Update store with new access token
       useAuthStore.getState().updateAccessToken(accessToken);

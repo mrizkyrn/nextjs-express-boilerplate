@@ -16,7 +16,6 @@ export const authenticate = asyncHandler(async (req: Request, res: Response, nex
   }
 
   const token = authHeader.split(' ')[1];
-  console.log('Token:', token); // Debugging line to check the token value
   const payload = verifyAccessToken(token);
 
   // Enrich user with permissions based on role

@@ -13,6 +13,7 @@ export interface GetUsersQueryParams {
   limit?: number;
   search?: string;
   role?: UserRole;
+  emailVerified?: boolean;
   sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'email';
   sortOrder?: 'asc' | 'desc';
 }
@@ -22,6 +23,7 @@ export interface UserResponse {
   email: string;
   name: string;
   role: UserRole;
+  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -26,6 +26,7 @@ export interface GetUsersParams {
   limit?: number;
   search?: string;
   role?: UserRole;
+  emailVerified?: boolean;
   sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'email';
   sortOrder?: 'asc' | 'desc';
 }

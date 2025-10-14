@@ -1,0 +1,196 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+
+import { Column, DataTable, SortConfig, TableFilters, TablePagination } from '@/components/tables';
+import { Button } from '@/components/ui/Button';
+import { useUsers } from '@/lib/hooks/queries/useUserQueries';
+import { GetUsersParams, User, UserRole } from '@/lib/types/user';
+
+const UsersPage = () => {
+  // State management
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [limit, setLimit] = useState(10);
+  const [filters, setFilters] = useState<Record<string, string[]>>({
+    role: [],
+    emailVerified: [],
+  });
+
+  // Fetch users with React Query
+  const { data, isLoading, error } = useUsers({
+    page: currentPage,
+    limit,
+    search: search || undefined,
+    role: filters.role[0] as UserRole | undefined,
+    emailVerified: filters.emailVerified[0] === 'true' ? true : filters.emailVerified[0] === 'false' ? false : undefined,
+    sortBy: sortConfig?.key as GetUsersParams['sortBy'],
+    sortOrder: sortConfig?.direction,
+  });
+
+  // Handle sort change and reset to first page
+  const handleSortChange = (newSortConfig: SortConfig | null) => {
+    setSortConfig(newSortConfig);
+    setCurrentPage(1);
+  };
+
+  // Handle filter change and reset to first page
+  const handleFilterChange = (filterId: string, values: string[]) => {
+    setFilters((prev) => ({ ...prev, [filterId]: values }));
+    setCurrentPage(1);
+  };
+
+  // Handle limit change and reset to first page
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setCurrentPage(1);
+  };
+
+  // Handle search change with debounce effect
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  // Define table columns
+  const columns: Column<User>[] = useMemo(
+    () => [
+      {
+        key: 'name',
+        header: 'Name',
+        sortable: true,
+        cellClassName: 'font-medium',
+      },
+      {
+        key: 'email',
+        header: 'Email',
+        sortable: true,
+        cellClassName: 'text-[var(--muted-foreground)]',
+      },
+      {
+        key: 'role',
+        header: 'Role',
+        align: 'center',
+        render: (user) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              user.role === UserRole.ADMIN
+                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+            }`}
+          >
+            {user.role}
+          </span>
+        ),
+      },
+      {
+        key: 'emailVerified',
+        header: 'Status',
+        align: 'center',
+        render: (user) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              user.emailVerified
+                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+            }`}
+          >
+            {user.emailVerified ? 'Verified' : 'Unverified'}
+          </span>
+        ),
+      },
+      {
+        key: 'createdAt',
+        header: 'Joined',
+        sortable: true,
+        render: (user) => new Date(user.createdAt).toLocaleDateString(),
+        cellClassName: 'text-[var(--muted-foreground)]',
+      },
+      {
+        key: 'actions',
+        header: 'Actions',
+        align: 'right',
+        render: () => (
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="ghost" size="sm">
+              Edit
+            </Button>
+            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-foreground text-2xl font-bold">Users</h1>
+          <p className="text-muted-foreground text-sm">Manage all users in your system</p>
+        </div>
+        <Button>Add User</Button>
+      </div>
+
+      {/* Filters */}
+      <TableFilters
+        searchValue={search}
+        searchPlaceholder="Search users by name or email..."
+        onSearchChange={handleSearchChange}
+        filterGroups={[
+          {
+            id: 'role',
+            label: 'Role',
+            options: [
+              { label: 'Admin', value: UserRole.ADMIN },
+              { label: 'User', value: UserRole.USER },
+            ],
+          },
+          {
+            id: 'emailVerified',
+            label: 'Verification Status',
+            options: [
+              { label: 'Verified', value: 'true' },
+              { label: 'Unverified', value: 'false' },
+            ],
+          },
+        ]}
+        activeFilters={filters}
+        onFilterChange={handleFilterChange}
+        limitOptions={[10, 25, 50, 100]}
+        limit={limit}
+        onLimitChange={handleLimitChange}
+      />
+
+      {/* Data Table */}
+      <DataTable
+        columns={columns}
+        data={data?.data || []}
+        isLoading={isLoading}
+        error={error?.message}
+        emptyMessage="No users found"
+        onSortChange={handleSortChange}
+        sortConfig={sortConfig}
+        clientSideSorting={false}
+        rowKey={(user) => user.id}
+      />
+
+      {/* Pagination */}
+      {data?.pagination && (
+        <TablePagination
+          pagination={data.pagination}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          showInfo={true}
+        />
+      )}
+    </div>
+  );
+};
+
+export default UsersPage;

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { queryKeys } from '@/lib/api/queryKeys';
 import { authApi } from '@/lib/api/services/authService';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { UserRole } from '@/lib/types';
 import type { ErrorResponse, SuccessResponse } from '@/lib/types/api';
 import type {
   ForgotPasswordRequest,
@@ -83,8 +84,12 @@ export const useLogin = () => {
         description: `Logged in as ${data.user.email}`,
       });
 
-      // Navigate to dashboard
-      router.push('/dashboard');
+      // Navigate to dashboard or profile
+      if (data.user.role === UserRole.ADMIN) {
+        router.push('/admin');
+      } else {
+        router.push('/profile');
+      }
     },
     onError: (error) => {
       logError('Login', error);

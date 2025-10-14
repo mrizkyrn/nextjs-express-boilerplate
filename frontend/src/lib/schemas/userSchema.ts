@@ -6,6 +6,7 @@ export const getUsersQuerySchema = z.object({
   limit: z.number().int().positive().max(100).optional().default(10),
   search: z.string().optional(),
   role: z.enum(UserRole).optional(),
+  emailVerified: z.boolean().optional(),
   sortBy: z.enum(['createdAt', 'updatedAt', 'name', 'email']).optional().default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });

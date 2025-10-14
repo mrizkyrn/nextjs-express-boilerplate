@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { Container } from '@/components/layouts/Container';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { ErrorState } from '@/components/ui/Error';
 import { Loading } from '@/components/ui/Loading';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -50,9 +50,11 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <Container as="main" className="py-8">
-        {children}
-      </Container>
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
+      {children}
     </div>
   );
 }
