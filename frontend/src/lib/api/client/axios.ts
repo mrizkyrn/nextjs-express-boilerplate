@@ -1,7 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 import { useAuthStore } from '@/lib/stores/authStore';
-import { API_BASE_URL, API_ENDPOINTS } from './endpoints';
+
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 /**
  * Axios instance with interceptors for authentication
@@ -69,9 +70,9 @@ apiClient.interceptors.response.use(
 
     // Avoid refreshing token for login/register/refresh endpoints
     if (
-      originalRequest.url?.includes(API_ENDPOINTS.AUTH.LOGIN) ||
-      originalRequest.url?.includes(API_ENDPOINTS.AUTH.REGISTER) ||
-      originalRequest.url?.includes(API_ENDPOINTS.AUTH.REFRESH)
+      originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/register') ||
+      originalRequest.url?.includes('/auth/refresh')
     ) {
       return Promise.reject(error);
     }
@@ -95,7 +96,7 @@ apiClient.interceptors.response.use(
 
     try {
       // Call refresh endpoint (httpOnly cookie sent automatically)
-      const response = await apiClient.post<{ accessToken: string }>(API_ENDPOINTS.AUTH.REFRESH);
+      const response = await apiClient.post<{ accessToken: string }>('/auth/refresh');
 
       const { accessToken } = response.data;
 

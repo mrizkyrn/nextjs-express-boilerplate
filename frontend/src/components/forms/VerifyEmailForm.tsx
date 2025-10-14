@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { Error, ErrorContent, ErrorDescription, ErrorHeader, ErrorMedia, ErrorTitle } from '@/components/ui/Error';
 import { Loading } from '@/components/ui/Loading';
 import { SuccessState } from '@/components/ui/Success';
-import { useResendVerification, useVerifyEmail } from '@/lib/hooks/useAuthMutations';
+import { useResendVerification, useVerifyEmail } from '@/lib/hooks/mutations/useAuthMutations';
 import { useCooldown } from '@/lib/hooks/useCooldown';
 
 const RESEND_COOLDOWN_KEY = 'email_verification_resend_time';

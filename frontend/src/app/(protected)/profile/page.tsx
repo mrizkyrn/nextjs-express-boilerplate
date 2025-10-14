@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { useLogout } from '@/lib/hooks/mutations/useAuthMutations';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { useLogout } from '@/lib/hooks/useAuthMutations';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function DashboardPage() {
       {/* Welcome Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
           <p className="text-muted-foreground">Welcome back! Here&apos;s your account overview.</p>
         </div>
         <Button onClick={handleLogout} variant="outline" isLoading={logout.isPending} loadingText="Logging out...">

@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
 import { Input, PasswordInput } from '@/components/ui/Input';
-import { useRegister } from '@/lib/hooks/useAuthMutations';
+import { useRegister } from '@/lib/hooks/mutations/useAuthMutations';
 import { registerSchema, type RegisterFormData } from '@/lib/schemas/authSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 

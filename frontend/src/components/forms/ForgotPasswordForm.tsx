@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
 import { Input } from '@/components/ui/Input';
-import { useForgotPassword } from '@/lib/hooks/useAuthMutations';
+import { useForgotPassword } from '@/lib/hooks/mutations/useAuthMutations';
 import { useCooldown } from '@/lib/hooks/useCooldown';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/authSchema';
 import { Mail } from 'lucide-react';

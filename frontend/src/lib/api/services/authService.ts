@@ -10,19 +10,16 @@ import type {
   User,
   VerifyEmailRequest,
 } from '@/lib/types';
-import { apiClient } from './axios';
-import { API_ENDPOINTS } from './endpoints';
+import { apiClient } from '../client/axios';
 
-/**
- * Authentication API functions
- * All API calls related to authentication
- */
+const AUTH_BASE = '/auth';
+
 export const authApi = {
   /**
    * Register new user
    */
   register: async (data: RegisterRequest): Promise<SuccessResponse<RegisterResponse>> => {
-    const response = await apiClient.post<SuccessResponse<RegisterResponse>>(API_ENDPOINTS.AUTH.REGISTER, data);
+    const response = await apiClient.post<SuccessResponse<RegisterResponse>>(`${AUTH_BASE}/register`, data);
     return response.data;
   },
 
@@ -30,7 +27,7 @@ export const authApi = {
    * Login user
    */
   login: async (credentials: LoginRequest): Promise<SuccessResponse<LoginResponse>> => {
-    const response = await apiClient.post<SuccessResponse<LoginResponse>>(API_ENDPOINTS.AUTH.LOGIN, credentials);
+    const response = await apiClient.post<SuccessResponse<LoginResponse>>(`${AUTH_BASE}/login`, credentials);
     return response.data;
   },
 
@@ -38,7 +35,7 @@ export const authApi = {
    * Logout user (clears refresh token cookie on server)
    */
   logout: async (): Promise<SuccessResponse<null>> => {
-    const response = await apiClient.post<SuccessResponse<null>>(API_ENDPOINTS.AUTH.LOGOUT);
+    const response = await apiClient.post<SuccessResponse<null>>(`${AUTH_BASE}/logout`);
     return response.data;
   },
 
@@ -46,7 +43,7 @@ export const authApi = {
    * Get current user profile
    */
   me: async (): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.get<SuccessResponse<User>>(API_ENDPOINTS.AUTH.ME);
+    const response = await apiClient.get<SuccessResponse<User>>(`${AUTH_BASE}/me`);
     return response.data;
   },
 
@@ -54,7 +51,7 @@ export const authApi = {
    * Refresh access token using httpOnly refresh token
    */
   refresh: async (): Promise<SuccessResponse<{ accessToken: string }>> => {
-    const response = await apiClient.post<SuccessResponse<{ accessToken: string }>>(API_ENDPOINTS.AUTH.REFRESH);
+    const response = await apiClient.post<SuccessResponse<{ accessToken: string }>>(`${AUTH_BASE}/refresh`);
     return response.data;
   },
 
@@ -62,7 +59,7 @@ export const authApi = {
    * Verify email address using token
    */
   verifyEmail: async (data: VerifyEmailRequest): Promise<SuccessResponse<null>> => {
-    const response = await apiClient.post<SuccessResponse<null>>(API_ENDPOINTS.AUTH.VERIFY_EMAIL, data);
+    const response = await apiClient.post<SuccessResponse<null>>(`${AUTH_BASE}/verify-email`, data);
     return response.data;
   },
 
@@ -70,7 +67,7 @@ export const authApi = {
    * Resend email verification
    */
   resendVerification: async (data: ResendVerificationRequest): Promise<SuccessResponse<null>> => {
-    const response = await apiClient.post<SuccessResponse<null>>(API_ENDPOINTS.AUTH.RESEND_VERIFICATION, data);
+    const response = await apiClient.post<SuccessResponse<null>>(`${AUTH_BASE}/resend-verification`, data);
     return response.data;
   },
 
@@ -78,7 +75,7 @@ export const authApi = {
    * Request password reset email
    */
   forgotPassword: async (data: ForgotPasswordRequest): Promise<SuccessResponse<null>> => {
-    const response = await apiClient.post<SuccessResponse<null>>(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, data);
+    const response = await apiClient.post<SuccessResponse<null>>(`${AUTH_BASE}/forgot-password`, data);
     return response.data;
   },
 
@@ -86,7 +83,7 @@ export const authApi = {
    * Reset password using token
    */
   resetPassword: async (data: ResetPasswordRequest): Promise<SuccessResponse<null>> => {
-    const response = await apiClient.post<SuccessResponse<null>>(API_ENDPOINTS.AUTH.RESET_PASSWORD, data);
+    const response = await apiClient.post<SuccessResponse<null>>(`${AUTH_BASE}/reset-password`, data);
     return response.data;
   },
 };

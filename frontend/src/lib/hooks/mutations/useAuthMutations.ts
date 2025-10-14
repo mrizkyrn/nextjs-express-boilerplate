@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import { authApi } from '@/lib/api/auth.api';
 import { queryKeys } from '@/lib/api/queryKeys';
+import { authApi } from '@/lib/api/services/authService';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { ErrorResponse, SuccessResponse } from '@/lib/types/api';
 import type {

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
 import { PasswordInput } from '@/components/ui/Input';
-import { useResetPassword } from '@/lib/hooks/useAuthMutations';
+import { useResetPassword } from '@/lib/hooks/mutations/useAuthMutations';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/schemas/authSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 

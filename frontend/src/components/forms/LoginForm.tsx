@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/Button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/Form';
 import { Input, PasswordInput } from '@/components/ui/Input';
-import { useLogin } from '@/lib/hooks/useAuthMutations';
+import { useLogin } from '@/lib/hooks/mutations/useAuthMutations';
 import { loginSchema, type LoginFormData } from '@/lib/schemas/authSchema';
 
 export function LoginForm() {
