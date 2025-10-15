@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from 'react';
 
-import { Column, DataTable, SortConfig, TableFilters, TablePagination } from '@/components/tables';
+import { DeleteUserDialog, UserDialog } from '@/components/dialogs';
+import { Column, DataTable, SortConfig, TableFilters, TablePagination, UserActionsDropdown } from '@/components/tables';
 import { Button } from '@/components/ui/Button';
 import { useUsers } from '@/lib/hooks/queries/useUserQueries';
 import { GetUsersParams, User, UserRole } from '@/lib/types/user';
+import { Plus } from 'lucide-react';
 
 const UsersPage = () => {
   // State management
@@ -18,13 +20,20 @@ const UsersPage = () => {
     emailVerified: [],
   });
 
+  // Dialog state
+  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+
   // Fetch users with React Query
   const { data, isLoading, error } = useUsers({
     page: currentPage,
     limit,
     search: search || undefined,
     role: filters.role[0] as UserRole | undefined,
-    emailVerified: filters.emailVerified[0] === 'true' ? true : filters.emailVerified[0] === 'false' ? false : undefined,
+    emailVerified:
+      filters.emailVerified[0] === 'true' ? true : filters.emailVerified[0] === 'false' ? false : undefined,
     sortBy: sortConfig?.key as GetUsersParams['sortBy'],
     sortOrder: sortConfig?.direction,
   });
@@ -47,10 +56,30 @@ const UsersPage = () => {
     setCurrentPage(1);
   };
 
-  // Handle search change with debounce effect
+  // Handle search change (debouncing handled by TableFilters component)
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setCurrentPage(1);
+  };
+
+  // Handle create user
+  const handleCreateUser = () => {
+    setDialogMode('create');
+    setSelectedUser(null);
+    setUserDialogOpen(true);
+  };
+
+  // Handle edit user
+  const handleEditUser = (user: User) => {
+    setDialogMode('edit');
+    setSelectedUser(user);
+    setUserDialogOpen(true);
+  };
+
+  // Handle delete user
+  const handleDeleteUser = (user: User) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
   };
 
   // Define table columns
@@ -60,18 +89,16 @@ const UsersPage = () => {
         key: 'name',
         header: 'Name',
         sortable: true,
-        cellClassName: 'font-medium',
       },
       {
         key: 'email',
         header: 'Email',
         sortable: true,
-        cellClassName: 'text-[var(--muted-foreground)]',
+        cellClassName: 'text-muted-foreground',
       },
       {
         key: 'role',
         header: 'Role',
-        align: 'center',
         render: (user) => (
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -87,7 +114,6 @@ const UsersPage = () => {
       {
         key: 'emailVerified',
         header: 'Status',
-        align: 'center',
         render: (user) => (
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -105,20 +131,15 @@ const UsersPage = () => {
         header: 'Joined',
         sortable: true,
         render: (user) => new Date(user.createdAt).toLocaleDateString(),
-        cellClassName: 'text-[var(--muted-foreground)]',
+        cellClassName: 'text-muted-foreground',
       },
       {
         key: 'actions',
         header: 'Actions',
         align: 'right',
-        render: () => (
-          <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" size="sm">
-              Edit
-            </Button>
-            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-              Delete
-            </Button>
+        render: (user) => (
+          <div className="flex items-center justify-end">
+            <UserActionsDropdown user={user} onEdit={handleEditUser} onDelete={handleDeleteUser} />
           </div>
         ),
       },
@@ -134,7 +155,10 @@ const UsersPage = () => {
           <h1 className="text-foreground text-2xl font-bold">Users</h1>
           <p className="text-muted-foreground text-sm">Manage all users in your system</p>
         </div>
-        <Button>Add User</Button>
+        <Button onClick={handleCreateUser}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add User
+        </Button>
       </div>
 
       {/* Filters */}
@@ -167,28 +191,34 @@ const UsersPage = () => {
         onLimitChange={handleLimitChange}
       />
 
-      {/* Data Table */}
-      <DataTable
-        columns={columns}
-        data={data?.data || []}
-        isLoading={isLoading}
-        error={error?.message}
-        emptyMessage="No users found"
-        onSortChange={handleSortChange}
-        sortConfig={sortConfig}
-        clientSideSorting={false}
-        rowKey={(user) => user.id}
-      />
-
-      {/* Pagination */}
-      {data?.pagination && (
-        <TablePagination
-          pagination={data.pagination}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          showInfo={true}
+      <div>
+        {/* Data Table */}
+        <DataTable
+          columns={columns}
+          data={data?.data || []}
+          isLoading={isLoading}
+          error={error?.message}
+          emptyMessage="No users found"
+          onSortChange={handleSortChange}
+          sortConfig={sortConfig}
+          clientSideSorting={false}
+          rowKey={(user) => user.id}
         />
-      )}
+
+        {/* Pagination */}
+        {data?.pagination && (
+          <TablePagination
+            pagination={data.pagination}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            showInfo={true}
+          />
+        )}
+      </div>
+
+      {/* Dialogs */}
+      <UserDialog open={userDialogOpen} onOpenChange={setUserDialogOpen} user={selectedUser} mode={dialogMode} />
+      <DeleteUserDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} user={selectedUser} />
     </div>
   );
 };

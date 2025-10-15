@@ -166,98 +166,83 @@ export function TableFilters({
   };
 
   return (
-    <div className={cn('flex flex-col gap-4', className)}>
+    <div className={cn('bg-background flex flex-col gap-4 rounded-lg p-3', className)}>
       {/* Search and Actions Row */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col md:flex-row items-center gap-3">
         {/* Search Input */}
         {onSearchChange && (
-          <div className="max-w-sm min-w-[200px] flex-1">
+          <div className="min-w-[200px] w-full">
             <Input
               icon={<Search className="h-4 w-4" />}
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="h-9"
+              className="h-9 w-full"
             />
           </div>
         )}
-
-        {/* Filters Button */}
-        {showFilters && filterGroups.length > 0 && (
-          <DropdownMenu open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 font-normal">
-                <Filter className="mr-2" />
-                Filters
-                {activeFilterCount > 0 && (
-                  <span className="bg-primary text-primary-foreground ml-2 flex h-5 w-5 items-center justify-center rounded-full text-xs">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {filterGroups.map((group, groupIndex) => (
-                <div key={group.id}>
-                  <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
-                  {group.options.map((option) => (
-                    <DropdownMenuCheckboxItem
-                      key={option.value}
-                      checked={activeFilters[group.id]?.includes(option.value) || false}
-                      onCheckedChange={() => handleFilterSelect(group.id, option.value, group.multiple ?? false)}
-                    >
-                      {option.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                  {groupIndex < filterGroups.length - 1 && <DropdownMenuSeparator />}
-                </div>
-              ))}
-              {activeFilterCount > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <div className="p-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleClearFilters}
-                      className="w-full justify-start text-xs"
-                    >
-                      <X className="mr-2 h-3 w-3" />
-                      Clear filters
-                    </Button>
+        <div className="flex w-full items-center gap-2">
+          {/* Filters Button */}
+          {showFilters && filterGroups.length > 0 && (
+            <DropdownMenu open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 font-normal">
+                  <Filter className="mr-2" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="bg-primary text-primary-foreground ml-2 flex h-5 w-5 items-center justify-center rounded-full text-xs">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="max-h-96 w-56">
+                {filterGroups.map((group, groupIndex) => (
+                  <div key={group.id}>
+                    <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                    {group.options.map((option) => (
+                      <DropdownMenuCheckboxItem
+                        key={option.value}
+                        checked={activeFilters[group.id]?.includes(option.value) || false}
+                        onCheckedChange={() => handleFilterSelect(group.id, option.value, group.multiple ?? false)}
+                      >
+                        {option.label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                    {groupIndex < filterGroups.length - 1 && <DropdownMenuSeparator />}
                   </div>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
-        {/* Limit Selector */}
-        {showLimit && onLimitChange && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 px-5 font-normal">
-                Show: {limit}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Items per page</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {limitOptions.map((option) => (
-                <DropdownMenuCheckboxItem
-                  key={option}
-                  checked={limit === option}
-                  onCheckedChange={() => onLimitChange(option)}
-                >
-                  {option} items
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+          {/* Limit Selector */}
+          {showLimit && onLimitChange && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 px-5 font-normal">
+                  Show: {limit}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Items per page</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {limitOptions.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option}
+                    checked={limit === option}
+                    onCheckedChange={() => onLimitChange(option)}
+                  >
+                    {option} items
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
-        {/* Custom Actions */}
-        {actions && <div className="ml-auto">{actions}</div>}
+          {/* Custom Actions */}
+          {actions && <div className="ml-auto">{actions}</div>}
+        </div>
       </div>
 
       {/* Active Filters Pills */}

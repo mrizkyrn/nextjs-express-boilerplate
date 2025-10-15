@@ -43,14 +43,12 @@ export interface TablePaginationProps {
  * Reusable table pagination component
  *
  * @example
- * ```tsx
  * <TablePagination
  *   pagination={data.pagination}
  *   currentPage={currentPage}
  *   onPageChange={setCurrentPage}
  *   showInfo={true}
  * />
- * ```
  */
 export function TablePagination({
   pagination,
@@ -108,18 +106,23 @@ export function TablePagination({
   const endItem = Math.min(currentPage * pagination.limit, pagination.total);
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div
+      className={cn(
+        'bg-background flex flex-col justify-between gap-5 rounded-b-lg border-t px-4 py-2 md:flex-row',
+        className
+      )}
+    >
       {/* Pagination Info */}
       {showInfo && (
-        <div className="text-muted-foreground flex items-center justify-between text-sm">
+        <div className="text-muted-foreground flex items-center justify-between gap-5 text-sm">
           <div>
-            Showing <span className="text-foreground font-medium">{startItem}</span> to{' '}
-            <span className="text-foreground font-medium">{endItem}</span> of{' '}
-            <span className="text-foreground font-medium">{pagination.total}</span> results
+            Showing <span className="text-foreground">{startItem}</span> to{' '}
+            <span className="text-foreground">{endItem}</span> of{' '}
+            <span className="text-foreground">{pagination.total}</span> results
           </div>
           <div>
-            Page <span className="text-foreground font-medium">{currentPage}</span> of{' '}
-            <span className="text-foreground font-medium">{pagination.totalPages}</span>
+            Page <span className="text-foreground">{currentPage}</span> of{' '}
+            <span className="text-foreground">{pagination.totalPages}</span>
           </div>
         </div>
       )}
@@ -132,7 +135,10 @@ export function TablePagination({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => pagination.hasPrevPage && onPageChange(currentPage - 1)}
-                className={cn(!pagination.hasPrevPage ? 'pointer-events-none opacity-50' : 'cursor-pointer')}
+                className={cn(
+                  'no-underline',
+                  !pagination.hasPrevPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                )}
               />
             </PaginationItem>
 
@@ -151,7 +157,7 @@ export function TablePagination({
                   <PaginationLink
                     onClick={() => onPageChange(page)}
                     isActive={page === currentPage}
-                    className="cursor-pointer"
+                    className="cursor-pointer no-underline"
                   >
                     {page}
                   </PaginationLink>
@@ -163,7 +169,10 @@ export function TablePagination({
             <PaginationItem>
               <PaginationNext
                 onClick={() => pagination.hasNextPage && onPageChange(currentPage + 1)}
-                className={cn(!pagination.hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer')}
+                className={cn(
+                  'no-underline',
+                  !pagination.hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                )}
               />
             </PaginationItem>
           </PaginationContent>

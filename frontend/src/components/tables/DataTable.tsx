@@ -310,7 +310,7 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={`overflow-hidden rounded-lg ${className}`}>
+    <div className={`overflow-hidden rounded-t-lg ${className}`}>
       <div className="overflow-x-auto overflow-y-visible">
         <table className={`divide-border w-full divide-y ${tableClassName}`}>
           {/* Table Header */}
