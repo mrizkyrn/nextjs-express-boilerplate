@@ -1,11 +1,18 @@
-import { Router } from 'express';
 import { Permission } from '@/config/rbac.config';
 import { userController } from '@/controller/user.controller';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { requirePermissions } from '@/middlewares/authorization.middleware';
 import { validate } from '@/middlewares/validate.middleware';
-import { createUserSchema, getUsersQuerySchema, updatePasswordSchema, updateUserSchema } from '@/schemas/user.schema';
+import {
+  batchDeleteUsersSchema,
+  batchUpdateRoleSchema,
+  createUserSchema,
+  getUsersQuerySchema,
+  updatePasswordSchema,
+  updateUserSchema,
+} from '@/schemas/user.schema';
 import { asyncHandler } from '@/utils/asyncHandler.util';
+import { Router } from 'express';
 
 const router = Router();
 
@@ -99,5 +106,29 @@ router.patch(
  * @access  Admin
  */
 router.delete('/:id', requirePermissions([Permission.USER_DELETE]), asyncHandler(userController.deleteUser.bind(userController)));
+
+/**
+ * @route   POST /api/users/batch/delete
+ * @desc    Batch delete multiple users (admin only)
+ * @access  Admin
+ */
+router.post(
+  '/batch/delete',
+  requirePermissions([Permission.USER_DELETE]),
+  validate({ body: batchDeleteUsersSchema }),
+  asyncHandler(userController.batchDeleteUsers.bind(userController))
+);
+
+/**
+ * @route   POST /api/users/batch/update-role
+ * @desc    Batch update user roles (admin only)
+ * @access  Admin
+ */
+router.post(
+  '/batch/update-role',
+  requirePermissions([Permission.USER_UPDATE]),
+  validate({ body: batchUpdateRoleSchema }),
+  asyncHandler(userController.batchUpdateRole.bind(userController))
+);
 
 export default router;

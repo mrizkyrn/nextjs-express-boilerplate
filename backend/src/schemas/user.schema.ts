@@ -50,8 +50,19 @@ export const updatePasswordSchema = z.object({
   newPassword: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
+export const batchDeleteUsersSchema = z.object({
+  userIds: z.array(z.cuid('Invalid user ID format')).min(1, 'At least one user ID is required'),
+});
+
+export const batchUpdateRoleSchema = z.object({
+  userIds: z.array(z.cuid('Invalid user ID format')).min(1, 'At least one user ID is required'),
+  role: z.enum(UserRole),
+});
+
 export type GetUsersQuery = z.infer<typeof getUsersQuerySchema>;
 export type GetUserByIdParams = z.infer<typeof getUserByIdSchema>;
 export type CreateUserBody = z.infer<typeof createUserSchema>;
 export type UpdateUserBody = z.infer<typeof updateUserSchema>;
 export type UpdatePasswordBody = z.infer<typeof updatePasswordSchema>;
+export type BatchDeleteUsersBody = z.infer<typeof batchDeleteUsersSchema>;
+export type BatchUpdateRoleBody = z.infer<typeof batchUpdateRoleSchema>;

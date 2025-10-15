@@ -97,3 +97,41 @@ export const useUpdatePassword = () => {
     },
   });
 };
+
+/**
+ * Batch delete multiple users (admin only)
+ */
+export const useBatchDeleteUsers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userIds: string[]) => userApi.batchDeleteUsers(userIds),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      toast.success(response.message || 'Users deleted successfully');
+    },
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete users';
+      toast.error(errorMessage);
+    },
+  });
+};
+
+/**
+ * Batch update user roles (admin only)
+ */
+export const useBatchUpdateRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userIds, role }: { userIds: string[]; role: string }) => userApi.batchUpdateRole(userIds, role),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      toast.success(response.message || 'User roles updated successfully');
+    },
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update user roles';
+      toast.error(errorMessage);
+    },
+  });
+};

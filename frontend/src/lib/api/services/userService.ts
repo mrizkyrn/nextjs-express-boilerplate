@@ -84,4 +84,20 @@ export const userApi = {
     const response = await apiClient.delete<SuccessResponse<null>>(`${USERS_BASE}/${id}`);
     return response.data;
   },
+
+  /**
+   * Batch delete multiple users (admin only)
+   */
+  batchDeleteUsers: async (userIds: string[]): Promise<SuccessResponse<null>> => {
+    const response = await apiClient.post<SuccessResponse<null>>(`${USERS_BASE}/batch/delete`, { userIds });
+    return response.data;
+  },
+
+  /**
+   * Batch update user roles (admin only)
+   */
+  batchUpdateRole: async (userIds: string[], role: string): Promise<SuccessResponse<null>> => {
+    const response = await apiClient.post<SuccessResponse<null>>(`${USERS_BASE}/batch/update-role`, { userIds, role });
+    return response.data;
+  },
 };

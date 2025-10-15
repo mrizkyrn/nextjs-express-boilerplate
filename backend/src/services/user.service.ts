@@ -228,6 +228,51 @@ export class UserService {
 
     return { total, byRole };
   }
+
+  /**
+   * Batch delete multiple users (admin only)
+   */
+  async batchDeleteUsers(userIds: string[]): Promise<{ count: number }> {
+    // Check if any users exist
+    const existingUsers = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true },
+    });
+
+    if (existingUsers.length === 0) {
+      throw new AppError(404, 'No users found to delete', ERROR_CODES.NOT_FOUND);
+    }
+
+    // Delete users
+    const result = await prisma.user.deleteMany({
+      where: { id: { in: userIds } },
+    });
+
+    return { count: result.count };
+  }
+
+  /**
+   * Batch update user roles (admin only)
+   */
+  async batchUpdateRole(userIds: string[], role: UserRole): Promise<{ count: number }> {
+    // Check if any users exist
+    const existingUsers = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true },
+    });
+
+    if (existingUsers.length === 0) {
+      throw new AppError(404, 'No users found to update', ERROR_CODES.NOT_FOUND);
+    }
+
+    // Update user roles
+    const result = await prisma.user.updateMany({
+      where: { id: { in: userIds } },
+      data: { role },
+    });
+
+    return { count: result.count };
+  }
 }
 
 export const userService = new UserService();

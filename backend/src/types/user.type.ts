@@ -1,4 +1,4 @@
-import { CreateUserBody, UpdatePasswordBody, UpdateUserBody } from '@/schemas/user.schema';
+import { BatchDeleteUsersBody, BatchUpdateRoleBody, CreateUserBody, UpdatePasswordBody, UpdateUserBody } from '@/schemas/user.schema';
 import { UserRole } from '@prisma/client';
 
 /**
@@ -7,6 +7,8 @@ import { UserRole } from '@prisma/client';
 export type CreateUserRequest = CreateUserBody;
 export type UpdateUserRequest = UpdateUserBody;
 export type UpdatePasswordRequest = UpdatePasswordBody;
+export type BatchDeleteUsersRequest = BatchDeleteUsersBody;
+export type BatchUpdateRoleRequest = BatchUpdateRoleBody;
 
 export interface GetUsersQueryParams {
   page?: number;

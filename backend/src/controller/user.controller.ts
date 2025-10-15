@@ -1,7 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { getUserByIdSchema } from '@/schemas/user.schema';
 import { userService } from '@/services/user.service';
-import type { CreateUserRequest, GetUsersQueryParams, UpdatePasswordRequest, UpdateUserRequest } from '@/types/user.type';
+import type {
+  BatchDeleteUsersRequest,
+  BatchUpdateRoleRequest,
+  CreateUserRequest,
+  GetUsersQueryParams,
+  UpdatePasswordRequest,
+  UpdateUserRequest,
+} from '@/types/user.type';
 import { sendSuccess, sendSuccessWithPagination } from '@/utils/response.util';
 
 export class UserController {
@@ -85,6 +92,23 @@ export class UserController {
   async getUserStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     const stats = await userService.getUserStats();
     sendSuccess(res, 200, 'User statistics retrieved successfully', stats);
+  }
+
+  /**
+   * Batch delete multiple users (admin only)
+   */
+  async batchDeleteUsers(req: Request<{}, {}, BatchDeleteUsersRequest>, res: Response, next: NextFunction): Promise<void> {
+    const result = await userService.batchDeleteUsers(req.body.userIds);
+    sendSuccess(res, 200, `Successfully deleted ${result.count} ${result.count === 1 ? 'user' : 'users'}`, result);
+  }
+
+  /**
+   * Batch update user roles (admin only)
+   */
+  async batchUpdateRole(req: Request<{}, {}, BatchUpdateRoleRequest>, res: Response, next: NextFunction): Promise<void> {
+    const { userIds, role } = req.body;
+    const result = await userService.batchUpdateRole(userIds, role);
+    sendSuccess(res, 200, `Successfully updated ${result.count} ${result.count === 1 ? 'user' : 'users'}`, result);
   }
 }
 

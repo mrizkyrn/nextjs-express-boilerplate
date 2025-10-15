@@ -18,8 +18,9 @@ export interface Column<T> {
 
   /**
    * Display header for the column
+   * Can be a string or a function that returns a ReactNode for custom header rendering
    */
-  header: string;
+  header: string | (() => ReactNode);
 
   /**
    * Whether the column is sortable
@@ -332,12 +333,12 @@ export function DataTable<T>({
                         onClick={() => handleSort(column.key)}
                         className="hover:text-foreground -mx-3 -my-1 h-auto text-xs font-medium uppercase hover:bg-transparent"
                       >
-                        {column.header}
+                        {typeof column.header === 'function' ? column.header() : column.header}
                       </Button>
                       {renderSortIcon(column.key)}
                     </div>
                   ) : (
-                    column.header
+                    <span>{typeof column.header === 'function' ? column.header() : column.header}</span>
                   )}
                 </th>
               ))}

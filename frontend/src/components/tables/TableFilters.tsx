@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, Search, X } from 'lucide-react';
+import { Filter, Search, X, List } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -186,7 +186,7 @@ export function TableFilters({
           {showFilters && filterGroups.length > 0 && (
             <DropdownMenu open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 font-normal">
+                <Button variant="outline" size="sm" className="h-9 text-xs">
                   <Filter className="mr-2" />
                   Filters
                   {activeFilterCount > 0 && (
@@ -220,7 +220,8 @@ export function TableFilters({
           {showLimit && onLimitChange && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 px-5 font-normal">
+                <Button variant="outline" size="sm" className="h-9 px-5 text-xs">
+                  <List className="mr-2" />
                   Show: {limit}
                 </Button>
               </DropdownMenuTrigger>
