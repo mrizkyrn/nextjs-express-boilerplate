@@ -23,6 +23,15 @@ interface DeleteUserDialogProps {
 /**
  * Confirmation dialog for deleting users
  * Displays user information and requires explicit confirmation
+ * 
+ * @example
+ * ```tsx
+ * <DeleteUserDialog
+ *   open={deleteUserOpen}
+ *   onOpenChange={setDeleteUserOpen}
+ *   user={selectedUser}
+ * />
+ * ```
  */
 export function DeleteUserDialog({ open, onOpenChange, user }: DeleteUserDialogProps) {
   const deleteMutation = useDeleteUser();
@@ -43,7 +52,7 @@ export function DeleteUserDialog({ open, onOpenChange, user }: DeleteUserDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
             <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">

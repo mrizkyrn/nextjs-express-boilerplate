@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 import { Loading } from '@/components/ui/Loading';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { UserRole } from '@/lib/types';
+import { UserRole } from '@/lib/types/user';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

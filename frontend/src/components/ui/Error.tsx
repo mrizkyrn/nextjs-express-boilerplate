@@ -3,16 +3,17 @@ import { AlertTriangleIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils/index';
+import { cn } from '@/lib/utils';
 
-// Constants
-const errorBaseClasses =
-  'border-destructive/20 bg-destructive/5 flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border p-6 text-center text-balance md:p-12';
-const errorHeaderBaseClasses = 'flex max-w-sm flex-col items-center gap-2 text-center';
-const errorTitleBaseClasses = 'text-lg font-medium tracking-tight';
-const errorDescriptionBaseClasses =
-  'text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4';
-const errorContentBaseClasses = 'flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance';
+const ERROR_BASE_CLASSES = {
+  container:
+    'border-destructive/20 bg-destructive/5 flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border p-6 text-center text-balance md:p-12',
+  header: 'flex max-w-sm flex-col items-center gap-2 text-center',
+  title: 'text-lg font-medium tracking-tight',
+  description:
+    'text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4',
+  content: 'flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance',
+} as const;
 
 const errorMediaVariants = cva(
   'mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0',
@@ -33,6 +34,7 @@ const errorMediaVariants = cva(
  * Error state component for displaying error messages.
  *
  * @example
+ * ```tsx
  * <Error>
  *   <ErrorHeader>
  *     <ErrorMedia><AlertTriangleIcon /></ErrorMedia>
@@ -50,13 +52,14 @@ const errorMediaVariants = cva(
  *   description="Something went wrong"
  *   onRetry={handleRetry}
  * />
+ * ```
  */
 function Error({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="error" className={cn(errorBaseClasses, className)} {...props} />;
+  return <div data-slot="error" className={cn(ERROR_BASE_CLASSES.container, className)} {...props} />;
 }
 
 function ErrorHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="error-header" className={cn(errorHeaderBaseClasses, className)} {...props} />;
+  return <div data-slot="error-header" className={cn(ERROR_BASE_CLASSES.header, className)} {...props} />;
 }
 
 function ErrorMedia({
@@ -75,18 +78,17 @@ function ErrorMedia({
 }
 
 function ErrorTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="error-title" className={cn(errorTitleBaseClasses, className)} {...props} />;
+  return <div data-slot="error-title" className={cn(ERROR_BASE_CLASSES.title, className)} {...props} />;
 }
 
 function ErrorDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return <div data-slot="error-description" className={cn(errorDescriptionBaseClasses, className)} {...props} />;
+  return <div data-slot="error-description" className={cn(ERROR_BASE_CLASSES.description, className)} {...props} />;
 }
 
 function ErrorContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="error-content" className={cn(errorContentBaseClasses, className)} {...props} />;
+  return <div data-slot="error-content" className={cn(ERROR_BASE_CLASSES.content, className)} {...props} />;
 }
 
-// Convenience component for simple error states
 interface ErrorStateProps {
   title?: string;
   description?: string;
@@ -97,6 +99,18 @@ interface ErrorStateProps {
   className?: string;
 }
 
+/**
+ * Error state component for displaying error messages.
+ *
+ * @example
+ * ```tsx
+ * <ErrorState
+ *  title="Error occurred"
+ *  description="Something went wrong"
+ *  onRetry={handleRetry}
+ * />
+ * ```
+ */
 function ErrorState({
   title = 'Something went wrong',
   description = 'An error occurred while loading this content. Please try again.',

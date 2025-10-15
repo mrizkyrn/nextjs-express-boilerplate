@@ -10,8 +10,11 @@ import {
   PaginationPrevious,
 } from '@/components/ui/Pagination';
 import { PaginationMeta } from '@/lib/types/api';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
+/**
+ * Props for the TablePagination component
+ */
 export interface TablePaginationProps {
   /**
    * Pagination metadata from API
@@ -43,12 +46,14 @@ export interface TablePaginationProps {
  * Reusable table pagination component
  *
  * @example
+ * ```tsx
  * <TablePagination
  *   pagination={data.pagination}
  *   currentPage={currentPage}
  *   onPageChange={setCurrentPage}
  *   showInfo={true}
  * />
+ * ```
  */
 export function TablePagination({
   pagination,
@@ -72,7 +77,7 @@ export function TablePagination({
     pages.push(1);
 
     // Calculate range around current page
-    const showPages = 2; // Number of pages to show on each side of current
+    const showPages = 2;
     const start = Math.max(2, current - showPages);
     const end = Math.min(total - 1, current + showPages);
 
@@ -108,7 +113,7 @@ export function TablePagination({
   return (
     <div
       className={cn(
-        'bg-background flex flex-col justify-between gap-5 rounded-b-lg border-t px-4 py-2 md:flex-row',
+        'bg-background border-border flex flex-col justify-between gap-5 rounded-b-lg border px-4 py-2 md:flex-row',
         className
       )}
     >

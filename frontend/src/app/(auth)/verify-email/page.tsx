@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 import { VerifyEmailForm } from '@/components/forms/VerifyEmailForm';
-import { SuspenseCardLoader } from '@/components/ui/SuspenseLoader';
+import { SuspenseCardLoader } from '@/components/SuspenseLoader';
 
 export const metadata: Metadata = {
   title: 'Verify Email',

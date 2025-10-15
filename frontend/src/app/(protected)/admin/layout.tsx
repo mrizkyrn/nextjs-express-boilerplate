@@ -1,21 +1,17 @@
-/**
- * Admin Layout
- * Protected layout for admin dashboard with sidebar navigation
- */
-
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import AdminSidebar from '@/components/layouts/AdminSidebar';
+import { Container } from '@/components/layouts/Container';
 import { ErrorState } from '@/components/ui/Error';
 import { Loading } from '@/components/ui/Loading';
-import { Container } from '@/components/layouts/Container';
 import { useLogout } from '@/lib/hooks/mutations/useAuthMutations';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { UserRole } from '@/lib/types';
+import { UserRole } from '@/lib/types/user';
+import { cn } from '@/lib/utils';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -71,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen bg-secondary">
+    <div className="bg-secondary min-h-screen">
       {/* Sidebar */}
       <AdminSidebar
         collapsed={sidebarCollapsed}
@@ -81,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className={cn('transition-all duration-300 ease-in-out', sidebarCollapsed ? 'ml-16' : 'ml-64')}>
         <Container as="main" className="py-8">
           {children}
         </Container>

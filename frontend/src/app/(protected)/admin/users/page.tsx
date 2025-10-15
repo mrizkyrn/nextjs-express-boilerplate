@@ -3,12 +3,20 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { BatchDeleteUsersDialog, BatchUpdateRoleDialog, DeleteUserDialog, UserDialog } from '@/components/dialogs';
-import { Column, DataTable, SortConfig, TableFilters, TablePagination, UserActionsDropdown } from '@/components/tables';
+import {
+  BatchActionsBar,
+  Column,
+  DataTable,
+  SortConfig,
+  TableFilters,
+  TablePagination,
+  UserActionsDropdown,
+} from '@/components/tables';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { useUsers } from '@/lib/hooks/queries/useUserQueries';
 import { GetUsersParams, User, UserRole } from '@/lib/types/user';
-import { Plus, Trash2, UserCog, X } from 'lucide-react';
+import { Plus, Trash2, UserCog } from 'lucide-react';
 
 const UsersPage = () => {
   // State management
@@ -33,7 +41,7 @@ const UsersPage = () => {
   const [batchUpdateRoleOpen, setBatchUpdateRoleOpen] = useState(false);
 
   // Fetch users with React Query
-  const { data, isLoading, error } = useUsers({
+  const { data, isLoading, error, refetch } = useUsers({
     page: currentPage,
     limit,
     search: search || undefined,
@@ -277,39 +285,25 @@ const UsersPage = () => {
       />
 
       {/* Batch Actions Bar */}
-      {selectedUserIds.size > 0 && (
-        <div className="bg-background flex items-center justify-between gap-5 rounded-lg px-4 py-3">
-          <div className="flex items-center gap-4">
-            <div className="text-muted-foreground text-sm">
-              <span className="text-foreground font-medium">{selectedUserIds.size}</span>{' '}
-              {selectedUserIds.size === 1 ? 'user' : 'users'} selected
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleBatchUpdateRole} className="h-8 text-xs">
-                <UserCog className="mr-2 h-3.5 w-3.5" />
-                Update Role
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBatchDelete}
-                className="text-destructive hover:bg-destructive hover:text-muted h-8 text-xs"
-              >
-                <Trash2 className="mr-2 h-3.5 w-3.5" />
-                Delete
-              </Button>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedUserIds(new Set())}
-            className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      <BatchActionsBar
+        selectedCount={selectedUserIds.size}
+        itemType="user"
+        actions={[
+          {
+            label: 'Update Role',
+            onClick: handleBatchUpdateRole,
+            icon: <UserCog className="h-3.5 w-3.5" />,
+          },
+          {
+            label: 'Delete',
+            onClick: handleBatchDelete,
+            variant: 'outline' as const,
+            icon: <Trash2 className="h-3.5 w-3.5" />,
+            className: 'text-destructive hover:bg-destructive hover:text-muted',
+          },
+        ]}
+        onClearSelection={() => setSelectedUserIds(new Set())}
+      />
 
       <div>
         {/* Data Table */}
@@ -318,6 +312,7 @@ const UsersPage = () => {
           data={data?.data || []}
           isLoading={isLoading}
           error={error?.message}
+          onRetry={refetch}
           emptyMessage="No users found"
           onSortChange={handleSortChange}
           sortConfig={sortConfig}

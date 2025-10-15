@@ -1,5 +1,7 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
+
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
@@ -11,27 +13,11 @@ import {
 } from '@/components/ui/Dialog';
 import { useBatchDeleteUsers } from '@/lib/hooks/mutations/useUserMutations';
 import { User, UserRole } from '@/lib/types/user';
-import { AlertTriangle } from 'lucide-react';
 
 interface BatchDeleteUsersDialogProps {
-  /**
-   * Control dialog open state
-   */
   open: boolean;
-
-  /**
-   * Callback when dialog open state changes
-   */
   onOpenChange: (open: boolean) => void;
-
-  /**
-   * Users to delete
-   */
   users: User[];
-
-  /**
-   * Callback after successful deletion
-   */
   onSuccess?: () => void;
 }
 
@@ -68,15 +54,15 @@ export function BatchDeleteUsersDialog({ open, onOpenChange, users, onSuccess }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
-              <AlertTriangle className="text-destructive h-5 w-5" />
+            <div className="bg-destructive/10 flex h-12 w-12 items-center justify-center rounded-full">
+              <AlertTriangle className="text-destructive h-6 w-6" />
             </div>
             <div>
-              <DialogTitle>Delete Multiple Users</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="mb-1 text-left">Delete Multiple Users</DialogTitle>
+              <DialogDescription className="text-left">
                 Are you sure you want to delete {users.length} {users.length === 1 ? 'user' : 'users'}?
               </DialogDescription>
             </div>
@@ -115,36 +101,32 @@ export function BatchDeleteUsersDialog({ open, onOpenChange, users, onSuccess }:
           </div>
 
           {/* User list preview (max 5) */}
-          {users.length <= 5 && (
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Users to be deleted:</p>
-              <div className="bg-background space-y-1 rounded-lg border p-3">
-                {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-muted-foreground text-xs">{user.email}</p>
-                    </div>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                        user.role === UserRole.ADMIN
-                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-                          : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                      }`}
-                    >
-                      {user.role}
-                    </span>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Users to be deleted:</p>
+            <div className="bg-background max-h-48 space-y-2 overflow-y-auto rounded-lg border p-3">
+              {users.map((user) => (
+                <div key={user.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="text-xs font-medium">{user.name}</p>
+                    <p className="text-muted-foreground text-xs">{user.email}</p>
                   </div>
-                ))}
-              </div>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                      user.role === UserRole.ADMIN
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}
+                  >
+                    {user.role}
+                  </span>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
-          {users.length > 5 && (
-            <p className="text-muted-foreground text-sm">
-              {users.length} users selected for deletion. The operation will permanently remove all of them.
-            </p>
-          )}
+          <p className="text-muted-foreground text-sm">
+            {users.length} users selected for deletion. The operation will permanently remove all of them.
+          </p>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">

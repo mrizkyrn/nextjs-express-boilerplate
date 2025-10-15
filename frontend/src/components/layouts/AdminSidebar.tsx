@@ -1,8 +1,8 @@
-import { BarChart3, ChevronLeft, ChevronRight, Home, LogOut, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, LogOut, Users } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface MenuItem {
   icon: ReactNode;
@@ -143,11 +143,6 @@ const AdminSidebar = ({ collapsed, setCollapsed, username, onLogout }: AdminSide
       label: 'Users',
       path: '/admin/users',
     },
-    {
-      icon: <BarChart3 size={16} />,
-      label: 'Analytics',
-      path: '/admin/analytics',
-    },
   ];
 
   // Handle navigation
@@ -158,7 +153,7 @@ const AdminSidebar = ({ collapsed, setCollapsed, username, onLogout }: AdminSide
   return (
     <aside
       className={cn(
-        'border-border bg-background relative flex h-full flex-col border-r transition-all duration-300 ease-in-out',
+        'border-border bg-background fixed top-0 left-0 z-40 flex h-screen flex-col border-r transition-all duration-300 ease-in-out',
         collapsed ? 'w-16' : 'w-64'
       )}
     >

@@ -3,9 +3,11 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 
+import { TableSkeleton } from '@/components/skeletons/TableSkeleton';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Empty';
-import { Loading } from '@/components/ui/Loading';
+import { ErrorState } from '@/components/ui/Error';
+import { cn } from '@/lib/utils';
 
 /**
  * Column definition for the data table
@@ -53,18 +55,20 @@ export interface Column<T> {
    * Column width (optional)
    */
   width?: string;
-
-  /**
-   * Column alignment
-   */
-  align?: 'left' | 'center' | 'right';
 }
 
 /**
  * Sort configuration
  */
 export interface SortConfig {
+  /**
+   * Unique identifier for the column to sort
+   */
   key: string;
+
+  /**
+   * Sort direction
+   */
   direction: 'asc' | 'desc';
 }
 
@@ -91,6 +95,11 @@ export interface DataTableProps<T> {
    * Error state
    */
   error?: string | null;
+
+  /**
+   * Callback when retrying after an error
+   */
+  onRetry?: () => void;
 
   /**
    * Empty state message
@@ -157,6 +166,7 @@ export function DataTable<T>({
   data,
   isLoading = false,
   error = null,
+  onRetry = () => {},
   emptyMessage = 'No data available',
   className = '',
   tableClassName = '',
@@ -253,20 +263,6 @@ export function DataTable<T>({
   };
 
   /**
-   * Get alignment class
-   */
-  const getAlignmentClass = (align?: 'left' | 'center' | 'right') => {
-    switch (align) {
-      case 'center':
-        return 'text-center';
-      case 'right':
-        return 'text-right';
-      default:
-        return 'text-left';
-    }
-  };
-
-  /**
    * Render sort icon
    */
   const renderSortIcon = (columnKey: string) => {
@@ -283,20 +279,14 @@ export function DataTable<T>({
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className={`border-border bg-card rounded-lg border ${className}`}>
-        <Loading />
-      </div>
-    );
+    return <TableSkeleton columns={columns} className={className} tableClassName={tableClassName} striped={striped} />;
   }
 
   // Error state
   if (error) {
     return (
       <div className={`border-border bg-card rounded-lg border p-8 ${className}`}>
-        <div className="text-center">
-          <p className="text-destructive text-sm">{error}</p>
-        </div>
+        <ErrorState title="Error" description={error || 'An unexpected error occurred.'} onRetry={onRetry} />
       </div>
     );
   }
@@ -304,25 +294,26 @@ export function DataTable<T>({
   // Empty state
   if (!data || data.length === 0) {
     return (
-      <div className={`border-border bg-card rounded-lg border ${className}`}>
+      <div className={cn('border-border bg-card rounded-lg border', className)}>
         <EmptyState title="No data" description={emptyMessage} />
       </div>
     );
   }
 
   return (
-    <div className={`overflow-hidden rounded-t-lg ${className}`}>
+    <div className={cn('border-border overflow-hidden rounded-t-lg border', className)}>
       <div className="overflow-x-auto overflow-y-visible">
-        <table className={`divide-border w-full divide-y ${tableClassName}`}>
+        <table className={cn('divide-border w-full divide-y', tableClassName)}>
           {/* Table Header */}
           <thead className="bg-muted/50">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase ${getAlignmentClass(
-                    column.align
-                  )} ${column.headerClassName || ''}`}
+                  className={cn(
+                    'text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase',
+                    column.headerClassName
+                  )}
                   style={{ width: column.width }}
                 >
                   {column.sortable ? (
@@ -350,14 +341,12 @@ export function DataTable<T>({
             {sortedData.map((item, index) => (
               <tr
                 key={rowKey(item, index)}
-                className={`hover:bg-muted/50 transition-colors ${striped && index % 2 === 1 ? 'bg-muted/25' : ''}`}
+                className={cn('hover:bg-muted/50 transition-colors', striped && index % 2 === 1 && 'bg-muted/25')}
               >
                 {columns.map((column) => (
                   <td
                     key={`${rowKey(item, index)}-${column.key}`}
-                    className={`text-foreground px-6 py-4 text-sm ${getAlignmentClass(
-                      column.align
-                    )} ${column.cellClassName || ''}`}
+                    className={cn('text-foreground px-6 py-4 text-sm', column.cellClassName)}
                   >
                     {getCellValue(item, column, index)}
                   </td>

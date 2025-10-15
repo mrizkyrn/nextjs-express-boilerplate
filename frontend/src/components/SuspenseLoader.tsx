@@ -14,6 +14,7 @@ interface SuspenseLoaderProps extends ComponentProps<typeof Suspense> {
  * Provides better UX with accessible loading states.
  *
  * @example
+ * ```tsx
  * // Basic usage
  * <SuspenseLoader>
  *   <AsyncComponent />
@@ -28,6 +29,7 @@ interface SuspenseLoaderProps extends ComponentProps<typeof Suspense> {
  * <SuspenseLoader variant="fullscreen" loadingMessage="Initializing...">
  *   <Dashboard />
  * </SuspenseLoader>
+ * ```
  */
 export function SuspenseLoader({
   children,
@@ -54,6 +56,7 @@ export function SuspenseLoader({
  * Provides a compact loading state within cards.
  *
  * @example
+ * ```tsx
  * <Card>
  *   <CardContent>
  *     <SuspenseCardLoader>
@@ -61,6 +64,7 @@ export function SuspenseLoader({
  *     </SuspenseCardLoader>
  *   </CardContent>
  * </Card>
+ * ```
  */
 export function SuspenseCardLoader({
   children,
@@ -80,9 +84,11 @@ export function SuspenseCardLoader({
  * Uses fullscreen variant for better UX on page transitions.
  *
  * @example
+ * ```tsx
  * <SuspensePageLoader loadingMessage="Loading dashboard...">
  *   <DashboardContent />
  * </SuspensePageLoader>
+ * ```
  */
 export function SuspensePageLoader({
   children,
@@ -101,11 +107,13 @@ export function SuspensePageLoader({
  * Provides a compact loading state suitable for forms.
  *
  * @example
+ * ```tsx
  * <Card>
  *   <SuspenseFormLoader loadingMessage="Loading form...">
  *     <ResetPasswordForm />
  *   </SuspenseFormLoader>
  * </Card>
+ * ```
  */
 export function SuspenseFormLoader({
   children,

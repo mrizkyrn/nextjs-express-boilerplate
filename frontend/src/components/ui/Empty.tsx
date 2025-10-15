@@ -2,16 +2,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { FileXIcon } from 'lucide-react';
 import * as React from 'react';
 
-import { cn } from '@/lib/utils/index';
+import { cn } from '@/lib/utils';
 
-// Constants
-const emptyBaseClasses =
-  'flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border-dashed p-6 text-center text-balance md:p-12';
-const emptyHeaderBaseClasses = 'flex max-w-sm flex-col items-center gap-2 text-center';
-const emptyTitleBaseClasses = 'text-lg font-medium tracking-tight';
-const emptyDescriptionBaseClasses =
-  'text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4';
-const emptyContentBaseClasses = 'flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance';
+const EMPTY_BASE_CLASSES = {
+  container:
+    'flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border-dashed p-6 text-center text-balance md:p-12',
+  header: 'flex max-w-sm flex-col items-center gap-2 text-center',
+  title: 'text-lg font-medium tracking-tight',
+  description:
+    'text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4',
+  content: 'flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance',
+} as const;
 
 const emptyMediaVariants = cva(
   'mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0',
@@ -32,6 +33,7 @@ const emptyMediaVariants = cva(
  * Empty state component for displaying when no data is available.
  *
  * @example
+ * ```tsx
  * <Empty>
  *   <EmptyHeader>
  *     <EmptyMedia><FileXIcon /></EmptyMedia>
@@ -45,17 +47,19 @@ const emptyMediaVariants = cva(
  *
  * // Or use the convenience component
  * <EmptyState
- *   title="No data"
- *   description="Add your first item"
+ *   title="No data found"
+ *   description="There is no data to display at the moment."
+ *   icon={<FileXIcon />}
  *   action={<Button>Add Item</Button>}
  * />
+ * ```
  */
 function Empty({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="empty" className={cn(emptyBaseClasses, className)} {...props} />;
+  return <div data-slot="empty" className={cn(EMPTY_BASE_CLASSES.container, className)} {...props} />;
 }
 
 function EmptyHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="empty-header" className={cn(emptyHeaderBaseClasses, className)} {...props} />;
+  return <div data-slot="empty-header" className={cn(EMPTY_BASE_CLASSES.header, className)} {...props} />;
 }
 
 function EmptyMedia({
@@ -74,18 +78,17 @@ function EmptyMedia({
 }
 
 function EmptyTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="empty-title" className={cn(emptyTitleBaseClasses, className)} {...props} />;
+  return <div data-slot="empty-title" className={cn(EMPTY_BASE_CLASSES.title, className)} {...props} />;
 }
 
 function EmptyDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return <div data-slot="empty-description" className={cn(emptyDescriptionBaseClasses, className)} {...props} />;
+  return <div data-slot="empty-description" className={cn(EMPTY_BASE_CLASSES.description, className)} {...props} />;
 }
 
 function EmptyContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="empty-content" className={cn(emptyContentBaseClasses, className)} {...props} />;
+  return <div data-slot="empty-content" className={cn(EMPTY_BASE_CLASSES.content, className)} {...props} />;
 }
 
-// Convenience component for simple empty states
 interface EmptyStateProps {
   title?: string;
   description?: string;
@@ -94,6 +97,19 @@ interface EmptyStateProps {
   className?: string;
 }
 
+/**
+ * Empty state component for displaying when no data is available.
+ *
+ * @example
+ * ```tsx
+ * <EmptyState
+ *   title="No data found"
+ *   description="There is no data to display at the moment."
+ *   icon={<FileXIcon />}
+ *   action={<Button>Add Item</Button>}
+ * />
+ * ```
+ */
 function EmptyState({
   title = 'No data found',
   description = 'There is no data to display at the moment.',

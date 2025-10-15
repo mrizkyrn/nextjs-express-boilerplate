@@ -1,7 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 import { useAuthStore } from '@/lib/stores/authStore';
-import { RefreshTokenResponse, SuccessResponse } from '@/lib/types';
+import type { SuccessResponse } from '@/lib/types/api';
+import type { RefreshTokenResponse } from '@/lib/types/auth';
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 

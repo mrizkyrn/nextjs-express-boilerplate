@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import type { AuthState } from '@/lib/types';
+import type { AuthState } from '@/lib/types/auth';
 
 /**
  * Global authentication store using Zustand

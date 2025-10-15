@@ -2,16 +2,17 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { CheckCircle2Icon } from 'lucide-react';
 import * as React from 'react';
 
-import { cn } from '@/lib/utils/index';
+import { cn } from '@/lib/utils';
 
-// Constants
-const successBaseClasses =
-  'border-green-200/50 bg-green-50/50 dark:border-green-800/50 dark:bg-green-900/20 flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border p-6 text-center text-balance md:p-12';
-const successHeaderBaseClasses = 'flex max-w-sm flex-col items-center gap-2 text-center';
-const successTitleBaseClasses = 'text-lg font-medium tracking-tight';
-const successDescriptionBaseClasses =
-  'text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4';
-const successContentBaseClasses = 'flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance';
+const SUCCESS_BASE_CLASSES = {
+  container:
+    'border-green-200/50 bg-green-50/50 dark:border-green-800/50 dark:bg-green-900/20 flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border p-6 text-center text-balance md:p-12',
+  header: 'flex max-w-sm flex-col items-center gap-2 text-center',
+  title: 'text-lg font-medium tracking-tight',
+  description:
+    'text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4',
+  content: 'flex w-full max-w-sm min-w-0 flex-col items-center gap-4 text-sm text-balance',
+} as const;
 
 const successMediaVariants = cva(
   'mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0',
@@ -32,6 +33,7 @@ const successMediaVariants = cva(
  * Success state component for displaying success messages and actions.
  *
  * @example
+ * ```tsx
  * <Success>
  *   <SuccessHeader>
  *     <SuccessMedia><CheckCircle2Icon /></SuccessMedia>
@@ -49,13 +51,14 @@ const successMediaVariants = cva(
  *   description="Your email has been successfully verified"
  *   action={<Button onClick={handleContinue}>Go to Login</Button>}
  * />
+ * ```
  */
 function Success({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="success" className={cn(successBaseClasses, className)} {...props} />;
+  return <div data-slot="success" className={cn(SUCCESS_BASE_CLASSES.container, className)} {...props} />;
 }
 
 function SuccessHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="success-header" className={cn(successHeaderBaseClasses, className)} {...props} />;
+  return <div data-slot="success-header" className={cn(SUCCESS_BASE_CLASSES.header, className)} {...props} />;
 }
 
 function SuccessMedia({
@@ -74,18 +77,17 @@ function SuccessMedia({
 }
 
 function SuccessTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="success-title" className={cn(successTitleBaseClasses, className)} {...props} />;
+  return <div data-slot="success-title" className={cn(SUCCESS_BASE_CLASSES.title, className)} {...props} />;
 }
 
 function SuccessDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return <div data-slot="success-description" className={cn(successDescriptionBaseClasses, className)} {...props} />;
+  return <div data-slot="success-description" className={cn(SUCCESS_BASE_CLASSES.description, className)} {...props} />;
 }
 
 function SuccessContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="success-content" className={cn(successContentBaseClasses, className)} {...props} />;
+  return <div data-slot="success-content" className={cn(SUCCESS_BASE_CLASSES.content, className)} {...props} />;
 }
 
-// Convenience component for simple success states
 interface SuccessStateProps {
   title?: string;
   description?: string;
@@ -95,6 +97,17 @@ interface SuccessStateProps {
   className?: string;
 }
 
+/**
+ * Convenience component for simple success states
+ *
+ * @example
+ * ```tsx
+ * <SuccessState
+ *  title="Email Verified"
+ *  description="Your email has been successfully verified"
+ *  action={<Button onClick={handleContinue}>Go to Login</Button>}
+ * />
+ */
 function SuccessState({
   title = 'Success!',
   description = 'Operation completed successfully.',

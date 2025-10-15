@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 
@@ -10,7 +11,6 @@ import { Input } from '@/components/ui/Input';
 import { useForgotPassword } from '@/lib/hooks/mutations/useAuthMutations';
 import { useCooldown } from '@/lib/hooks/useCooldown';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/authSchema';
-import { Mail } from 'lucide-react';
 
 const FORGOT_PASSWORD_KEY = 'forgot_password_resend_time';
 const FORGOT_PASSWORD_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes
@@ -32,8 +32,11 @@ export function ForgotPasswordForm() {
 
   const onSubmit = (data: ForgotPasswordFormData) => {
     if (!cooldown.isActive) {
-      cooldown.start();
-      forgotPassword(data);
+      forgotPassword(data, {
+        onSuccess: () => {
+          cooldown.start();
+        },
+      });
     }
   };
 

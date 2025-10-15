@@ -41,8 +41,14 @@ export function VerifyEmailForm() {
 
   const handleResend = () => {
     if (email && !cooldown.isActive) {
-      cooldown.start();
-      resendVerification({ email });
+      resendVerification(
+        { email },
+        {
+          onSuccess: () => {
+            cooldown.start();
+          },
+        }
+      );
     }
   };
 

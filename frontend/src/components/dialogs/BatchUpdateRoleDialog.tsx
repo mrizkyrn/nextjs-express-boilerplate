@@ -1,5 +1,8 @@
 'use client';
 
+import { Users } from 'lucide-react';
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
@@ -13,28 +16,11 @@ import { Label } from '@/components/ui/Label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { useBatchUpdateRole } from '@/lib/hooks/mutations/useUserMutations';
 import { User, UserRole } from '@/lib/types/user';
-import { Users } from 'lucide-react';
-import { useState } from 'react';
 
 interface BatchUpdateRoleDialogProps {
-  /**
-   * Control dialog open state
-   */
   open: boolean;
-
-  /**
-   * Callback when dialog open state changes
-   */
   onOpenChange: (open: boolean) => void;
-
-  /**
-   * Users to update
-   */
   users: User[];
-
-  /**
-   * Callback after successful update
-   */
   onSuccess?: () => void;
 }
 
@@ -83,12 +69,12 @@ export function BatchUpdateRoleDialog({ open, onOpenChange, users, onSuccess }: 
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
-              <Users className="text-primary h-5 w-5" />
+            <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+              <Users className="text-primary h-6 w-6" />
             </div>
             <div>
-              <DialogTitle>Update User Roles</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="mb-1 text-left">Update User Roles</DialogTitle>
+              <DialogDescription className="text-left">
                 Change the role for {users.length} selected {users.length === 1 ? 'user' : 'users'}
               </DialogDescription>
             </div>

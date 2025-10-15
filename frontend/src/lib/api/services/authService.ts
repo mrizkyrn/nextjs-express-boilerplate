@@ -1,3 +1,4 @@
+import type { SuccessResponse } from '@/lib/types/api';
 import type {
   ForgotPasswordRequest,
   LoginRequest,
@@ -6,10 +7,9 @@ import type {
   RegisterResponse,
   ResendVerificationRequest,
   ResetPasswordRequest,
-  SuccessResponse,
-  User,
   VerifyEmailRequest,
-} from '@/lib/types';
+} from '@/lib/types/auth';
+import type { UserResponse } from '@/lib/types/user';
 import { apiClient } from '../client/axios';
 
 const AUTH_BASE = '/auth';
@@ -42,8 +42,8 @@ export const authApi = {
   /**
    * Get current user profile
    */
-  me: async (): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.get<SuccessResponse<User>>(`${AUTH_BASE}/me`);
+  me: async (): Promise<SuccessResponse<UserResponse>> => {
+    const response = await apiClient.get<SuccessResponse<UserResponse>>(`${AUTH_BASE}/me`);
     return response.data;
   },
 

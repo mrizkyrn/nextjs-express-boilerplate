@@ -1,6 +1,6 @@
 'use client';
 
-import { Filter, Search, X, List } from 'lucide-react';
+import { Filter, List, Search, X } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -13,13 +13,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu';
 import { Input } from '@/components/ui/Input';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
+/**
+ * Option for a single filter
+ */
 export interface FilterOption {
   label: string;
   value: string;
 }
 
+/**
+ * Group of filters
+ */
 export interface FilterGroup {
   id: string;
   label: string;
@@ -27,6 +33,9 @@ export interface FilterGroup {
   multiple?: boolean;
 }
 
+/**
+ * Props for the TableFilters component
+ */
 export interface TableFiltersProps {
   /**
    * Search value
@@ -166,12 +175,12 @@ export function TableFilters({
   };
 
   return (
-    <div className={cn('bg-background flex flex-col gap-4 rounded-lg p-3', className)}>
+    <div className={cn('bg-background border-border flex flex-col gap-4 rounded-lg border p-4', className)}>
       {/* Search and Actions Row */}
-      <div className="flex flex-col md:flex-row items-center gap-3">
+      <div className="flex flex-col items-center gap-3 md:flex-row">
         {/* Search Input */}
         {onSearchChange && (
-          <div className="min-w-[200px] w-full">
+          <div className="w-full min-w-[200px]">
             <Input
               icon={<Search className="h-4 w-4" />}
               placeholder={searchPlaceholder}

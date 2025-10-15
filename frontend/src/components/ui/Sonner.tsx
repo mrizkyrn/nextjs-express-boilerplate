@@ -9,6 +9,7 @@ import { Toaster as Sonner, ToasterProps } from 'sonner';
  * Automatically adapts to the current theme.
  *
  * @example
+ * ```tsx
  * // Add to root layout
  * <Toaster />
  *
@@ -16,6 +17,8 @@ import { Toaster as Sonner, ToasterProps } from 'sonner';
  * import { toast } from 'sonner';
  * toast.success('Operation successful!');
  * toast.error('Something went wrong');
+ * toast('Here is a notification');
+ * ```
  */
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();

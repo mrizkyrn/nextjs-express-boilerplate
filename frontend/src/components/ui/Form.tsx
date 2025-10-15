@@ -14,13 +14,14 @@ import {
 } from 'react-hook-form';
 
 import { Label } from '@/components/ui/Label';
-import { cn } from '@/lib/utils/index';
+import { cn } from '@/lib/utils';
 
-// Constants
-const formItemBaseClasses = 'grid gap-2';
-const formLabelBaseClasses = 'data-[error=true]:text-destructive';
-const formDescriptionBaseClasses = 'text-muted-foreground text-sm';
-const formMessageBaseClasses = 'text-destructive text-xs';
+const FORM_BASE_CLASSES = {
+  item: 'grid gap-2',
+  label: 'data-[error=true]:text-destructive',
+  description: 'text-muted-foreground text-sm',
+  message: 'text-destructive text-xs',
+} as const;
 
 // Types
 type FormFieldContextValue<
@@ -43,6 +44,7 @@ const FormItemContext = React.createContext<FormItemContextValue>({} as FormItem
  * Wrap your form elements with this component to enable form state management.
  *
  * @example
+ * ```tsx
  * <Form {...formMethods}>
  *   <form onSubmit={formMethods.handleSubmit(onSubmit)}>
  *     <FormField
@@ -61,6 +63,7 @@ const FormItemContext = React.createContext<FormItemContextValue>({} as FormItem
  *     <Button type="submit">Submit</Button>
  *   </form>
  * </Form>
+ * ```
  */
 const Form = FormProvider;
 
@@ -116,11 +119,10 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn(formItemBaseClasses, className)} {...props} />
+      <div data-slot="form-item" className={cn(FORM_BASE_CLASSES.item, className)} {...props} />
     </FormItemContext.Provider>
   );
 }
-
 FormItem.displayName = 'FormItem';
 
 function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
@@ -130,13 +132,12 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
     <Label
       data-slot="form-label"
       data-error={!!error}
-      className={cn(formLabelBaseClasses, className)}
+      className={cn(FORM_BASE_CLASSES.label, className)}
       htmlFor={formItemId}
       {...props}
     />
   );
 }
-
 FormLabel.displayName = 'FormLabel';
 
 function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
@@ -157,7 +158,6 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
     />
   );
 }
-
 FormControl.displayName = 'FormControl';
 
 function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
@@ -167,12 +167,11 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn(formDescriptionBaseClasses, className)}
+      className={cn(FORM_BASE_CLASSES.description, className)}
       {...props}
     />
   );
 }
-
 FormDescription.displayName = 'FormDescription';
 
 function FormMessage({ className, children, ...props }: React.ComponentProps<'p'>) {
@@ -185,12 +184,11 @@ function FormMessage({ className, children, ...props }: React.ComponentProps<'p'
   }
 
   return (
-    <p data-slot="form-message" id={formMessageId} className={cn(formMessageBaseClasses, className)} {...props}>
+    <p data-slot="form-message" id={formMessageId} className={cn(FORM_BASE_CLASSES.message, className)} {...props}>
       {body}
     </p>
   );
 }
-
 FormMessage.displayName = 'FormMessage';
 
 export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };

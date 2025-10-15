@@ -1,38 +1,60 @@
+import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
-import { cn } from '@/lib/utils/index';
+import { cn } from '@/lib/utils';
 
-interface LoadingProps {
+const loadingVariants = cva('flex flex-col items-center justify-center gap-4 text-center', {
+  variants: {
+    variant: {
+      inline: 'min-w-0 flex-1 p-6 text-balance md:p-12',
+      fullscreen: 'fixed inset-0 z-50 bg-background',
+      overlay: 'fixed inset-0 z-50',
+    },
+    backdrop: {
+      true: 'bg-background/80 backdrop-blur-sm',
+      false: '',
+    },
+  },
+  defaultVariants: {
+    variant: 'inline',
+    backdrop: true,
+  },
+});
+
+interface LoadingProps extends VariantProps<typeof loadingVariants> {
   message?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'inline' | 'fullscreen' | 'overlay';
   className?: string;
-  showBackdrop?: boolean;
 }
 
 /**
  * A loading component with multiple variants and sizes.
  *
  * @example
+ * ```tsx
  * // Inline loading
  * <Loading message="Loading data..." />
  *
  * // Fullscreen loading
  * <Loading variant="fullscreen" message="Please wait..." />
  *
- * // Overlay loading with backdrop
- * <Loading variant="overlay" showBackdrop />
+ * // Overlay loading (always with backdrop)
+ * <Loading variant="overlay" />
+ *
+ * // Overlay without backdrop
+ * <Loading variant="overlay" backdrop={false} />
  *
  * // Different sizes
  * <Loading size="lg" message="Loading..." />
+ * ```
  */
 function Loading({
   message = 'Loading...',
   size = 'md',
   variant = 'inline',
+  backdrop = true,
   className,
-  showBackdrop = true,
   ...props
 }: LoadingProps & React.ComponentProps<'div'>) {
   const spinnerSize = {
@@ -42,23 +64,14 @@ function Loading({
     xl: 'size-12',
   }[size];
 
-  const isFullscreen = variant === 'fullscreen';
-  const isOverlay = variant === 'overlay';
+  // For overlay variant, always show backdrop; for others, use the backdrop prop
+  const shouldShowBackdrop = variant === 'overlay' ? true : backdrop;
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className={cn(
-        'flex flex-col items-center justify-center gap-4 text-center',
-        {
-          'min-w-0 flex-1 p-6 text-balance md:p-12': variant === 'inline',
-          'fixed inset-0 z-50': isFullscreen || isOverlay,
-          'bg-background': isFullscreen,
-          'bg-background/80 backdrop-blur-sm': isOverlay && showBackdrop,
-        },
-        className
-      )}
+      className={cn(loadingVariants({ variant, backdrop: shouldShowBackdrop }), className)}
       {...props}
     >
       <Spinner className={spinnerSize} aria-hidden="true" />

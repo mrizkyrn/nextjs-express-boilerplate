@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { queryKeys } from '@/lib/api/queryKeys';
 import { authApi } from '@/lib/api/services/authService';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { UserRole } from '@/lib/types';
 import type { ErrorResponse, SuccessResponse } from '@/lib/types/api';
 import type {
   ForgotPasswordRequest,
@@ -18,11 +17,11 @@ import type {
   ResetPasswordRequest,
   VerifyEmailRequest,
 } from '@/lib/types/auth';
+import { UserRole } from '@/lib/types/user';
 import { getErrorMessage, logError } from '@/lib/utils/errorHandler';
 
 /**
  * Hook for user registration
- * @returns Mutation object with register function and state
  */
 export const useRegister = () => {
   const router = useRouter();
@@ -31,35 +30,26 @@ export const useRegister = () => {
     mutationFn: async (data: RegisterRequest): Promise<SuccessResponse<RegisterResponse>> => {
       return await authApi.register(data);
     },
-    onSuccess: (apiResponse) => {
-      const { data, message } = apiResponse;
+    onSuccess: (response) => {
+      const { data, message } = response;
 
-      // Start cooldown immediately after registration
+      // Save timestamp to limit resends
       localStorage.setItem('email_verification_resend_time', Date.now().toString());
 
-      // Use API success message
-      toast.success(message, {
-        description: `Please check ${data.email} for verification email`,
-      });
-
-      // Navigate to verify-email page with email as query param
+      toast.success(message, { description: `Please check ${data.email} for verification email` });
       router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     },
     onError: (error) => {
       logError('Registration', error);
       const errorMessage = getErrorMessage(error, 'Unable to create account. Please try again.');
-
-      toast.error('Registration failed', {
-        description: errorMessage,
-      });
+      toast.error('Registration failed', { description: errorMessage });
     },
-    retry: false, // Don't retry auth requests
+    retry: false,
   });
 };
 
 /**
  * Hook for user login
- * @returns Mutation object with login function and state
  */
 export const useLogin = () => {
   const router = useRouter();
@@ -72,19 +62,10 @@ export const useLogin = () => {
     },
     onSuccess: (response) => {
       const { data, message } = response;
-
-      // Update auth state with the data
       setAuth(data.user, data.accessToken);
-
-      // Invalidate user queries to refetch fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
+      toast.success(message, { description: `Logged in as ${data.user.email}` });
 
-      // Use API success message
-      toast.success(message, {
-        description: `Logged in as ${data.user.email}`,
-      });
-
-      // Navigate to dashboard or profile
       if (data.user.role === UserRole.ADMIN) {
         router.push('/admin');
       } else {
@@ -94,18 +75,14 @@ export const useLogin = () => {
     onError: (error) => {
       logError('Login', error);
       const errorMessage = getErrorMessage(error, 'Invalid email or password');
-
-      toast.error('Login failed', {
-        description: errorMessage,
-      });
+      toast.error('Login failed', { description: errorMessage });
     },
-    retry: false, // Don't retry auth requests
+    retry: false,
   });
 };
 
 /**
  * Hook for user logout
- * @returns Mutation object with logout function and state
  */
 export const useLogout = () => {
   const router = useRouter();
@@ -116,42 +93,26 @@ export const useLogout = () => {
     mutationFn: async (): Promise<SuccessResponse<null>> => {
       return await authApi.logout();
     },
-    onSuccess: (apiResponse) => {
-      const { message } = apiResponse;
-
-      // Clear auth state
+    onSuccess: (response) => {
+      const { message } = response;
       clearAuth();
-
-      // Clear all cached queries
       queryClient.clear();
-
-      // Use API success message
-      toast.success(message, {
-        description: 'See you next time!',
-      });
-
-      // Navigate to login
+      toast.success(message, { description: 'See you next time!' });
       router.push('/login');
     },
     onError: () => {
       // Even if logout fails on server, clear local state for security
       clearAuth();
       queryClient.clear();
-
-      toast.info('Logged out locally', {
-        description: 'Your session has been cleared.',
-      });
-
-      // Navigate to login anyway
+      toast.info('Logged out locally', { description: 'Your session has been cleared.' });
       router.push('/login');
     },
-    retry: false, // Don't retry logout
+    retry: false,
   });
 };
 
 /**
  * Hook for email verification
- * @returns Mutation object with verifyEmail function and state
  */
 export const useVerifyEmail = () => {
   const router = useRouter();
@@ -160,23 +121,15 @@ export const useVerifyEmail = () => {
     mutationFn: async (data: VerifyEmailRequest): Promise<SuccessResponse<null>> => {
       return await authApi.verifyEmail(data);
     },
-    onSuccess: (apiResponse) => {
-      const { message } = apiResponse;
-
-      toast.success(message, {
-        description: 'You can now log in to your account',
-      });
-
-      // Navigate to login
+    onSuccess: (response) => {
+      const { message } = response;
+      toast.success(message, { description: 'You can now log in to your account' });
       router.push('/login');
     },
     onError: (error) => {
       logError('Email Verification', error);
       const errorMessage = getErrorMessage(error, 'Invalid or expired verification token');
-
-      toast.error('Verification failed', {
-        description: errorMessage,
-      });
+      toast.error('Verification failed', { description: errorMessage });
     },
     retry: false,
   });
@@ -184,27 +137,20 @@ export const useVerifyEmail = () => {
 
 /**
  * Hook for resending verification email
- * @returns Mutation object with resendVerification function and state
  */
 export const useResendVerification = () => {
   return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, ResendVerificationRequest>({
     mutationFn: async (data: ResendVerificationRequest): Promise<SuccessResponse<null>> => {
       return await authApi.resendVerification(data);
     },
-    onSuccess: (apiResponse) => {
-      const { message } = apiResponse;
-
-      toast.success(message, {
-        description: 'Please check your email inbox',
-      });
+    onSuccess: (response) => {
+      const { message } = response;
+      toast.success(message, { description: 'Please check your email inbox' });
     },
     onError: (error) => {
       logError('Resend Verification', error);
       const errorMessage = getErrorMessage(error, 'Failed to resend verification email');
-
-      toast.error('Resend failed', {
-        description: errorMessage,
-      });
+      toast.error('Resend failed', { description: errorMessage });
     },
     retry: false,
   });
@@ -212,27 +158,20 @@ export const useResendVerification = () => {
 
 /**
  * Hook for requesting password reset
- * @returns Mutation object with forgotPassword function and state
  */
 export const useForgotPassword = () => {
   return useMutation<SuccessResponse<null>, AxiosError<ErrorResponse>, ForgotPasswordRequest>({
     mutationFn: async (data: ForgotPasswordRequest): Promise<SuccessResponse<null>> => {
       return await authApi.forgotPassword(data);
     },
-    onSuccess: (apiResponse) => {
-      const { message } = apiResponse;
-
-      toast.success(message, {
-        description: 'Please check your email for instructions',
-      });
+    onSuccess: (response) => {
+      const { message } = response;
+      toast.success(message, { description: 'Please check your email for instructions' });
     },
     onError: (error) => {
       logError('Forgot Password', error);
       const errorMessage = getErrorMessage(error, 'Failed to process password reset request');
-
-      toast.error('Request failed', {
-        description: errorMessage,
-      });
+      toast.error('Request failed', { description: errorMessage });
     },
     retry: false,
   });
@@ -240,7 +179,6 @@ export const useForgotPassword = () => {
 
 /**
  * Hook for resetting password
- * @returns Mutation object with resetPassword function and state
  */
 export const useResetPassword = () => {
   const router = useRouter();
@@ -249,23 +187,15 @@ export const useResetPassword = () => {
     mutationFn: async (data: ResetPasswordRequest): Promise<SuccessResponse<null>> => {
       return await authApi.resetPassword(data);
     },
-    onSuccess: (apiResponse) => {
-      const { message } = apiResponse;
-
-      toast.success(message, {
-        description: 'You can now log in with your new password',
-      });
-
-      // Navigate to login
+    onSuccess: (response) => {
+      const { message } = response;
+      toast.success(message, { description: 'You can now log in with your new password' });
       router.push('/login');
     },
     onError: (error) => {
       logError('Password Reset', error);
       const errorMessage = getErrorMessage(error, 'Invalid or expired reset token');
-
-      toast.error('Password reset failed', {
-        description: errorMessage,
-      });
+      toast.error('Password reset failed', { description: errorMessage });
     },
     retry: false,
   });

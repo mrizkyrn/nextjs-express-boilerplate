@@ -22,6 +22,15 @@ interface UserActionsDropdownProps {
 /**
  * Reusable dropdown menu for user actions
  * Provides edit and delete actions with proper icons and styling
+ *
+ * @example
+ * ```tsx
+ * <UserActionsDropdown
+ *   user={user}
+ *   onEdit={(user) => handleEdit(user)}
+ *   onDelete={(user) => handleDelete(user)}
+ * />
+ * ```
  */
 export function UserActionsDropdown({ user, onEdit, onDelete }: UserActionsDropdownProps) {
   return (

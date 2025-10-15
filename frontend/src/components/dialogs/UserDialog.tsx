@@ -1,7 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { Lock, Mail, User as UserIcon } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/Button';
@@ -20,7 +21,6 @@ import { useCreateUser, useUpdateUser } from '@/lib/hooks/mutations/useUserMutat
 import type { CreateUserInput, UpdateUserInput } from '@/lib/schemas/userSchema';
 import { createUserSchema, updateUserSchema } from '@/lib/schemas/userSchema';
 import type { User, UserRole } from '@/lib/types/user';
-import { Lock, Mail, User as UserIcon } from 'lucide-react';
 
 interface UserDialogProps {
   open: boolean;
@@ -32,6 +32,16 @@ interface UserDialogProps {
 /**
  * Dialog component for creating and editing users
  * Handles both create and edit modes with proper form validation
+ *
+ * @example
+ * ```tsx
+ * <UserDialog
+ *   open={userDialogOpen}
+ *   onOpenChange={setUserDialogOpen}
+ *   user={selectedUser}
+ *   mode={isEditMode ? 'edit' : 'create'}
+ * />
+ * ```
  */
 export function UserDialog({ open, onOpenChange, user, mode }: UserDialogProps) {
   const isEditMode = mode === 'edit' && !!user;
@@ -50,6 +60,32 @@ export function UserDialog({ open, onOpenChange, user, mode }: UserDialogProps) 
       role: 'USER' as UserRole,
     },
   });
+
+  // Watch form values to detect changes
+  const watchedValues = form.watch();
+
+  // Store initial values for comparison
+  const initialValues = useMemo(() => {
+    if (isEditMode && user) {
+      return {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+    }
+    return null;
+  }, [isEditMode, user]);
+
+  // Check if form has changes (only in edit mode)
+  const hasChanges = useMemo(() => {
+    if (!isEditMode || !initialValues) return true; // Always allow create mode
+
+    return (
+      watchedValues.name !== initialValues.name ||
+      watchedValues.email !== initialValues.email ||
+      watchedValues.role !== initialValues.role
+    );
+  }, [watchedValues, initialValues, isEditMode]);
 
   // Reset form when dialog opens/closes or user changes
   useEffect(() => {
@@ -93,7 +129,7 @@ export function UserDialog({ open, onOpenChange, user, mode }: UserDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit User' : 'Create New User'}</DialogTitle>
           <DialogDescription>
@@ -198,7 +234,12 @@ export function UserDialog({ open, onOpenChange, user, mode }: UserDialogProps) 
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                 Cancel
               </Button>
-              <Button type="submit" isLoading={isPending} loadingText={isEditMode ? 'Updating...' : 'Creating...'}>
+              <Button
+                type="submit"
+                isLoading={isPending}
+                loadingText={isEditMode ? 'Updating...' : 'Creating...'}
+                disabled={isEditMode && !hasChanges}
+              >
                 {isEditMode ? 'Update User' : 'Create User'}
               </Button>
             </DialogFooter>

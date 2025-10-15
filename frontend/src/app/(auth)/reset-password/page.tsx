@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 
 import { ResetPasswordForm } from '@/components/forms/ResetPasswordForm';
+import { SuspenseFormLoader } from '@/components/SuspenseLoader';
 import { Card } from '@/components/ui/Card';
 import { ErrorState } from '@/components/ui/Error';
-import { SuspenseFormLoader } from '@/components/ui/SuspenseLoader';
 
 export const metadata: Metadata = {
   title: 'Reset Password',

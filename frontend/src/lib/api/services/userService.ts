@@ -1,13 +1,12 @@
+import type { SuccessResponse } from '@/lib/types/api';
 import type {
   CreateUserRequest,
   GetUsersParams,
-  SuccessResponse,
   UpdatePasswordRequest,
   UpdateUserRequest,
-  User,
   UserResponse,
   UserStats,
-} from '@/lib/types';
+} from '@/lib/types/user';
 import { apiClient } from '../client/axios';
 
 const USERS_BASE = '/users';
@@ -32,16 +31,16 @@ export const userApi = {
   /**
    * Get current user profile
    */
-  getCurrentUser: async (): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.get<SuccessResponse<User>>(`${USERS_BASE}/me`);
+  getCurrentUser: async (): Promise<SuccessResponse<UserResponse>> => {
+    const response = await apiClient.get<SuccessResponse<UserResponse>>(`${USERS_BASE}/me`);
     return response.data;
   },
 
   /**
    * Update current user profile
    */
-  updateCurrentUser: async (data: UpdateUserRequest): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.patch<SuccessResponse<User>>(`${USERS_BASE}/me`, data);
+  updateCurrentUser: async (data: UpdateUserRequest): Promise<SuccessResponse<UserResponse>> => {
+    const response = await apiClient.patch<SuccessResponse<UserResponse>>(`${USERS_BASE}/me`, data);
     return response.data;
   },
 
@@ -56,24 +55,24 @@ export const userApi = {
   /**
    * Get user by ID (admin only)
    */
-  getUserById: async (id: string): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.get<SuccessResponse<User>>(`${USERS_BASE}/${id}`);
+  getUserById: async (id: string): Promise<SuccessResponse<UserResponse>> => {
+    const response = await apiClient.get<SuccessResponse<UserResponse>>(`${USERS_BASE}/${id}`);
     return response.data;
   },
 
   /**
    * Create new user (admin only)
    */
-  createUser: async (data: CreateUserRequest): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.post<SuccessResponse<User>>(USERS_BASE, data);
+  createUser: async (data: CreateUserRequest): Promise<SuccessResponse<UserResponse>> => {
+    const response = await apiClient.post<SuccessResponse<UserResponse>>(USERS_BASE, data);
     return response.data;
   },
 
   /**
    * Update user by ID (admin only)
    */
-  updateUser: async (id: string, data: UpdateUserRequest): Promise<SuccessResponse<User>> => {
-    const response = await apiClient.patch<SuccessResponse<User>>(`${USERS_BASE}/${id}`, data);
+  updateUser: async (id: string, data: UpdateUserRequest): Promise<SuccessResponse<UserResponse>> => {
+    const response = await apiClient.patch<SuccessResponse<UserResponse>>(`${USERS_BASE}/${id}`, data);
     return response.data;
   },
 

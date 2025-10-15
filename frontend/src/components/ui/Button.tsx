@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 import { Spinner } from '@/components/ui/Spinner';
-import { cn } from '@/lib/utils/index';
+import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -38,8 +38,20 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /*
+   * If true, the button will be rendered as a child of another component.
+   */
   asChild?: boolean;
+
+  /**
+   * If true, the button will show a loading spinner and be disabled.
+   */
   isLoading?: boolean;
+
+  /**
+   * Text to display when the button is in a loading state.
+   * Defaults to "Loading..." if not provided.
+   */
   loadingText?: string;
 }
 
@@ -47,9 +59,11 @@ export interface ButtonProps
  * A customizable button component with loading states and multiple variants.
  *
  * @example
+ * ```tsx
  * <Button>Click me</Button>
  * <Button variant="destructive" isLoading>Delete</Button>
  * <Button asChild><Link href="/page">Navigate</Link></Button>
+ * ```
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -79,7 +93,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   }
 );
-
 Button.displayName = 'Button';
 
 export { Button, buttonVariants };

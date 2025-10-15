@@ -1,7 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
+
 import { queryKeys } from '@/lib/api/queryKeys';
 import { authApi } from '@/lib/api/services/authService';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { useQuery } from '@tanstack/react-query';
 
 export const useAuth = () => {
   const { user, isAuthenticated, accessToken } = useAuthStore();

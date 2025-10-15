@@ -89,7 +89,7 @@
   --destructive: oklch(0.577 0.245 27.325);
 
   /* Form Elements */
-  --border: oklch(0.929 0.013 255.508);
+  --border: oklch(95.099% 0.00637 255.746);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
 
@@ -169,5 +169,52 @@
 
   a {
     @apply text-link hover:text-link-hover focus:text-link-hover visited:text-link-visited decoration-link hover:decoration-link-hover focus:decoration-link-hover underline decoration-1 underline-offset-2 transition-all duration-200;
+  }
+
+  /* Modern Minimalist Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.6 0.02 264.695);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.5 0.02 264.695);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: oklch(0.4 0.02 264.695);
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-thumb {
+    background: oklch(0.4 0.02 264.695);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.5 0.02 264.695);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:active {
+    background: oklch(0.6 0.02 264.695);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.6 0.02 264.695) transparent;
+  }
+
+  .dark * {
+    scrollbar-color: oklch(0.4 0.02 264.695) transparent;
   }
 }
