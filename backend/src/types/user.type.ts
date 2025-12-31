@@ -29,3 +29,10 @@ export interface UserResponse {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface UserStatsResponse {
+  totalUsers: number;
+  verifiedUsers: number;
+  admins: number;
+  usersByRole: Record<string, number>;
+}

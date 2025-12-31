@@ -5,7 +5,7 @@ export const getUsersQuerySchema = z.object({
   page: z.number().int().positive().optional().default(1),
   limit: z.number().int().positive().max(100).optional().default(10),
   search: z.string().optional(),
-  role: z.enum(UserRole).optional(),
+  role: z.nativeEnum(UserRole).optional(),
   emailVerified: z.boolean().optional(),
   sortBy: z.enum(['createdAt', 'updatedAt', 'name', 'email']).optional().default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
@@ -15,7 +15,7 @@ export const createUserSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must not exceed 100 characters'),
   email: z.email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(UserRole).optional().default(UserRole.USER),
+  role: z.nativeEnum(UserRole).optional().default(UserRole.USER),
 });
 
 export const updateUserSchema = z.object({
@@ -25,7 +25,7 @@ export const updateUserSchema = z.object({
     .max(100, 'Name must not exceed 100 characters')
     .optional(),
   email: z.email('Invalid email format').optional(),
-  role: z.enum(UserRole).optional(),
+  role: z.nativeEnum(UserRole).optional(),
 });
 
 export const updatePasswordSchema = z.object({

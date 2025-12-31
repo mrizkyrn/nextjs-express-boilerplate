@@ -168,7 +168,7 @@
   }
 
   a {
-    @apply text-link hover:text-link-hover focus:text-link-hover visited:text-link-visited decoration-link hover:decoration-link-hover focus:decoration-link-hover underline decoration-1 underline-offset-2 transition-all duration-200;
+    @apply text-link hover:text-link-hover focus:text-link-hover visited:text-link-visited decoration-link hover:decoration-link-hover focus:decoration-link-hover decoration-1 transition-all duration-200;
   }
 
   /* Modern Minimalist Scrollbar */

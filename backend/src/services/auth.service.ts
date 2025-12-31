@@ -9,6 +9,7 @@ import type {
   ForgotPasswordRequest,
   LoginRequest,
   RegisterRequest,
+  RegisterResponse,
   ResendVerificationRequest,
   ResetPasswordRequest,
   VerifyEmailRequest,
@@ -25,7 +26,7 @@ export class AuthService {
    * Register a new user account
    * Creates user with hashed password and sends email verification
    */
-  async register(data: RegisterRequest): Promise<{ message: string; email: string }> {
+  async register(data: RegisterRequest): Promise<RegisterResponse> {
     const { email, password, name } = data;
 
     // Check if email already exists
@@ -74,10 +75,7 @@ export class AuthService {
         logger.error('Failed to send verification email:', error);
       });
 
-    return {
-      message: 'Registration successful. Please check your email to verify your account.',
-      email: newUser.email,
-    };
+    return { email: newUser.email };
   }
 
   /**

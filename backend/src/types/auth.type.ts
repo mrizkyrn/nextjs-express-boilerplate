@@ -1,7 +1,7 @@
-import type { JwtPayload } from 'jsonwebtoken';
 import { Permission } from '@/config/rbac.config';
 import { ForgotPasswordInput, LoginInput, RegisterInput, ResendVerificationInput, ResetPasswordInput, VerifyEmailInput } from '@/schemas/auth.schema';
 import { UserRole } from '@prisma/client';
+import type { JwtPayload } from 'jsonwebtoken';
 import type { UserResponse } from './user.type';
 
 /**
@@ -14,6 +14,10 @@ export type ForgotPasswordRequest = ForgotPasswordInput;
 export type ResetPasswordRequest = ResetPasswordInput;
 export type VerifyEmailRequest = VerifyEmailInput;
 export type ResendVerificationRequest = ResendVerificationInput;
+
+export interface RegisterResponse {
+  email: string;
+}
 
 export interface LoginResponse {
   user: UserResponse;

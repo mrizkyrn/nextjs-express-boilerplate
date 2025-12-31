@@ -1,7 +1,6 @@
 import { ArrowRight, Lock, Shield, Zap } from 'lucide-react';
 import Link from 'next/link';
 
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 
@@ -9,7 +8,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Section */}
-      <ThemeToggle />
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="flex flex-col items-center space-y-8 text-center">
           {/* Badge */}

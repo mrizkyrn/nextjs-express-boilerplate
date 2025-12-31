@@ -1,15 +1,16 @@
-import { NextFunction, Request, Response } from 'express';
 import { getUserByIdSchema } from '@/schemas/user.schema';
 import { userService } from '@/services/user.service';
-import type {
-  BatchDeleteUsersRequest,
-  BatchUpdateRoleRequest,
-  CreateUserRequest,
-  GetUsersQueryParams,
-  UpdatePasswordRequest,
-  UpdateUserRequest,
+import {
+  UserResponse,
+  type BatchDeleteUsersRequest,
+  type BatchUpdateRoleRequest,
+  type CreateUserRequest,
+  type GetUsersQueryParams,
+  type UpdatePasswordRequest,
+  type UpdateUserRequest,
 } from '@/types/user.type';
 import { sendSuccess, sendSuccessWithPagination } from '@/utils/response.util';
+import { NextFunction, Request, Response } from 'express';
 
 export class UserController {
   /**
@@ -17,7 +18,7 @@ export class UserController {
    */
   async getUsers(req: Request<{}, {}, {}, GetUsersQueryParams>, res: Response, next: NextFunction): Promise<void> {
     const { users, pagination } = await userService.getUsers(req.query);
-    sendSuccessWithPagination(res, 200, 'Users retrieved successfully', users, pagination);
+    sendSuccessWithPagination<UserResponse[]>(res, 200, 'Users retrieved successfully', users, pagination);
   }
 
   /**
@@ -26,7 +27,7 @@ export class UserController {
   async getUserById(req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> {
     const { id } = getUserByIdSchema.parse(req.params);
     const user = await userService.getUserById(id);
-    sendSuccess(res, 200, 'User retrieved successfully', user);
+    sendSuccess<UserResponse>(res, 200, 'User retrieved successfully', user);
   }
 
   /**
@@ -35,7 +36,7 @@ export class UserController {
   async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.user!.id;
     const user = await userService.getUserById(userId);
-    sendSuccess(res, 200, 'User profile retrieved successfully', user);
+    sendSuccess<UserResponse>(res, 200, 'User profile retrieved successfully', user);
   }
 
   /**
@@ -43,7 +44,7 @@ export class UserController {
    */
   async createUser(req: Request<{}, {}, CreateUserRequest>, res: Response, next: NextFunction): Promise<void> {
     const user = await userService.createUser(req.body);
-    sendSuccess(res, 201, 'User created successfully', user);
+    sendSuccess<UserResponse>(res, 201, 'User created successfully', user);
   }
 
   /**
@@ -52,7 +53,7 @@ export class UserController {
   async updateUser(req: Request<{ id: string }, {}, UpdateUserRequest>, res: Response, next: NextFunction): Promise<void> {
     const { id } = getUserByIdSchema.parse(req.params);
     const user = await userService.updateUser(id, req.body);
-    sendSuccess(res, 200, 'User updated successfully', user);
+    sendSuccess<UserResponse>(res, 200, 'User updated successfully', user);
   }
 
   /**
@@ -65,7 +66,7 @@ export class UserController {
     const { role, ...updateData } = req.body;
 
     const user = await userService.updateUser(userId, updateData);
-    sendSuccess(res, 200, 'Profile updated successfully', user);
+    sendSuccess<UserResponse>(res, 200, 'Profile updated successfully', user);
   }
 
   /**

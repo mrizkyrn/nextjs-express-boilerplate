@@ -1,20 +1,21 @@
-import { NextFunction, Request, Response } from 'express';
 import { cookieConfig, REFRESH_TOKEN_COOKIE } from '@/config/auth.config';
 import { ERROR_CODES } from '@/config/error.config';
 import { authService } from '@/services/auth.service';
-import type {
-  ForgotPasswordRequest,
-  LoginRequest,
-  LoginResponse,
-  RefreshTokenResponse,
-  RegisterRequest,
-  ResendVerificationRequest,
-  ResetPasswordRequest,
-  VerifyEmailRequest,
+import {
+  RegisterResponse,
+  type ForgotPasswordRequest,
+  type LoginRequest,
+  type LoginResponse,
+  type RefreshTokenResponse,
+  type RegisterRequest,
+  type ResendVerificationRequest,
+  type ResetPasswordRequest,
+  type VerifyEmailRequest,
 } from '@/types/auth.type';
 import type { UserResponse } from '@/types/user.type';
 import { AppError } from '@/utils/error.util';
 import { sendSuccess } from '@/utils/response.util';
+import { NextFunction, Request, Response } from 'express';
 
 export class AuthController {
   /**
@@ -22,7 +23,9 @@ export class AuthController {
    */
   async register(req: Request<{}, any, RegisterRequest>, res: Response, next: NextFunction): Promise<void> {
     const result = await authService.register(req.body);
-    sendSuccess(res, 201, result.message, { email: result.email });
+    sendSuccess<RegisterResponse>(res, 201, 'Registration successful', {
+      email: result.email,
+    });
   }
 
   /**
@@ -107,7 +110,7 @@ export class AuthController {
    */
   async verifyEmail(req: Request<{}, any, VerifyEmailRequest>, res: Response, next: NextFunction): Promise<void> {
     await authService.verifyEmail(req.body);
-    sendSuccess(res, 200, 'Email verified successfully. You can now log in to your account.');
+    sendSuccess(res, 200, 'Email verified successfully');
   }
 
   /**
