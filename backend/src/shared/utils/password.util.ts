@@ -1,4 +1,4 @@
-import { PASSWORD } from '@/shared/constant';
+import { PASSWORD } from '@/shared/constants';
 import bcrypt from 'bcryptjs';
 
 /**

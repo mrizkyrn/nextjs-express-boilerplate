@@ -4,11 +4,11 @@ import { inject, injectable } from 'tsyringe';
 
 import type { EmailService } from '@/infrastructure/email/email.service';
 import { env } from '@/shared/config/environment.config';
-import { ERROR_CODES, TOKEN } from '@/shared/constant';
-import { AppError } from '@/shared/util/error.util';
-import { generateTokenPair, verifyRefreshToken } from '@/shared/util/jwt.util';
-import { comparePassword, hashPassword } from '@/shared/util/password.util';
-import { calculateTokenExpiry, generateSecureToken } from '@/shared/util/token.utils';
+import { DI_TYPES, ERROR_CODES, TOKEN } from '@/shared/constants';
+import { AppError } from '@/shared/utils/error.util';
+import { generateTokenPair, verifyRefreshToken } from '@/shared/utils/jwt.util';
+import { comparePassword, hashPassword } from '@/shared/utils/password.util';
+import { calculateTokenExpiry, generateSecureToken } from '@/shared/utils/token.utils';
 import { mapUserResponse, USER_BASE_SELECT } from '../users/user.mapper';
 import type {
   ForgotPasswordBody,

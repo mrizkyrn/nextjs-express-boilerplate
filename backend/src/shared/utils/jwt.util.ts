@@ -2,9 +2,9 @@ import { randomBytes } from 'crypto';
 import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
 
 import { jwtConfig } from '@/shared/config/auth.config';
-import { ERROR_CODES } from '@/shared/constant';
-import { AppError } from '@/shared/util/error.util';
-import type { AccessTokenPayload, RefreshTokenPayload, TokenPair, TokenPayload } from '@/types/auth.type';
+import { ERROR_CODES } from '@/shared/constants';
+import { AppError } from '@/shared/utils/error.util';
+import type { AccessTokenPayload, RefreshTokenPayload, TokenPair, TokenPayload } from '@/modules/auth/auth.type';
 
 /**
  * Generate a unique token ID for refresh tokens

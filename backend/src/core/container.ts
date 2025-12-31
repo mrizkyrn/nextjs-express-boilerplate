@@ -10,7 +10,7 @@ import { ResendClient } from '@/infrastructure/email/resend.client';
 import { ILogger, logger } from '@/infrastructure/logging/winston.logger';
 import { AuthService } from '@/modules/auth/auth.service';
 import { UserService } from '@/modules/users/user.service';
-import { DI_TYPES } from '@/shared/constant';
+import { DI_TYPES } from '@/shared/constants';
 
 // ======================= Libraries  =======================
 

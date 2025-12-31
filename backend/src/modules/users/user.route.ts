@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
 import { container } from '@/core/container';
-import { DI_TYPES } from '@/shared/constant';
+import { DI_TYPES } from '@/shared/constants';
 import { authenticate } from '@/shared/middleware/authentication.middleware';
 import { requireAdmin } from '@/shared/middleware/authorization.middleware';
 import { validate } from '@/shared/middleware/validation.middleware';
-import { asyncHandler } from '@/shared/util/async-handler.util';
+import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { UserController } from './user.controller';
 import {
   batchDeleteUsersSchema,

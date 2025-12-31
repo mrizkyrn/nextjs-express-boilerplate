@@ -1,5 +1,5 @@
-import { PAGINATION } from '@/shared/constant';
-import type { PaginationMeta } from '@/types/response.type';
+import { PAGINATION } from '@/shared/constants';
+import type { PaginationMeta } from '@/shared/types/response.type';
 
 /**
  * Calculate pagination metadata

@@ -1,8 +1,8 @@
 import { UserRole } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
-import { ERROR_CODES } from '@/shared/constant';
-import { AppError } from '@/shared/util/error.util';
+import { ERROR_CODES } from '@/shared/constants';
+import { AppError } from '@/shared/utils/error.util';
 
 /**
  * Require specific roles

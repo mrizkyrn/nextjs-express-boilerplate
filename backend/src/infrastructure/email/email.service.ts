@@ -1,8 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 
 import type { ILogger } from '@/infrastructure/logging/winston.logger';
-import { EMAIL_CONFIG, EMAIL_SUBJECTS } from '@/shared/config/email.config';
-import { DI_TYPES } from '@/shared/constants/di-types';
+import { env } from '@/shared/config/environment.config';
+import { DI_TYPES, EMAIL_SUBJECTS } from '@/shared/constants';
 import type { EmailRenderer } from './email.renderer';
 import type { PasswordChangedEmailData, PasswordResetEmailData, VerifyEmailData, WelcomeEmailData } from './email.type';
 import type { ResendClient } from './resend.client';
@@ -41,12 +41,12 @@ export class EmailService {
     emailType?: string
   ): Promise<void> {
     const result = await this.resendClient.send({
-      from: EMAIL_CONFIG.from,
+      from: env.email.from,
       to,
       subject,
       html,
       text,
-      replyTo: EMAIL_CONFIG.replyTo,
+      replyTo: env.email.from,
     });
 
     this.logger.info(`${emailType || 'Email'} sent successfully`, { emailId: result.id, to });

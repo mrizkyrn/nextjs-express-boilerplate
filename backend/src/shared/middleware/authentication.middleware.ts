@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { ERROR_CODES } from '@/shared/constant';
-import { asyncHandler } from '@/shared/util/async-handler.util';
-import { AppError } from '@/shared/util/error.util';
-import { verifyAccessToken } from '@/shared/util/jwt.util';
-import { enrichUserWithPermissions } from '@/shared/util/rbac.util';
+import { ERROR_CODES } from '@/shared/constants';
+import { asyncHandler } from '@/shared/utils/async-handler.util';
+import { AppError } from '@/shared/utils/error.util';
+import { verifyAccessToken } from '@/shared/utils/jwt.util';
 
 /**
  * Authentication middleware
@@ -20,12 +19,12 @@ export const authenticate = asyncHandler(async (req: Request, res: Response, nex
   const payload = verifyAccessToken(token);
 
   // Enrich user with permissions based on role
-  req.user = enrichUserWithPermissions({
+  req.user = {
     id: payload.userId,
     email: payload.email,
     name: payload.name,
     role: payload.role as any,
-  });
+  };
 
   next();
 });

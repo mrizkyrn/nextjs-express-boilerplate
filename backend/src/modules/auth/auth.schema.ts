@@ -1,4 +1,4 @@
-import { PASSWORD } from '@/shared/constant';
+import { PASSWORD } from '@/shared/constants';
 import { z } from 'zod';
 
 export const loginSchema = z.object({

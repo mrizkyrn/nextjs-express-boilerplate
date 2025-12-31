@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { IdParam } from '@/shared/schemas/common.schema';
-import { sendSuccess, sendSuccessWithPagination } from '@/shared/util/response.util';
-import { assertType } from '@/shared/util/type.util';
+import { sendSuccess, sendSuccessWithPagination } from '@/shared/utils/response.util';
+import { assertType } from '@/shared/utils/type.util';
 import type {
   BatchDeleteUsersBody,
   BatchUpdateRoleBody,

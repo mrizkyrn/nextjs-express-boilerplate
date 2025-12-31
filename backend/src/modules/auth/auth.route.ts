@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
 import { container } from '@/core/container';
-import { DI_TYPES } from '@/shared/constant';
+import { DI_TYPES } from '@/shared/constants';
 import { authenticate } from '@/shared/middleware/authentication.middleware';
 import { authLimiter } from '@/shared/middleware/rate-limiter.middleware';
 import { validate } from '@/shared/middleware/validation.middleware';
-import { asyncHandler } from '@/shared/util/async-handler.util';
+import { asyncHandler } from '@/shared/utils/async-handler.util';
 import { AuthController } from './auth.controller';
 import {
   forgotPasswordSchema,

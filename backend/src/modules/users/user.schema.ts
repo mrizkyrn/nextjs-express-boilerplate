@@ -1,7 +1,7 @@
 import { UserRole } from '@prisma/client';
 import { z } from 'zod';
 
-import { PASSWORD } from '@/shared/constant';
+import { PASSWORD } from '@/shared/constants';
 import { arrayField, searchAndPaginationFields } from '@/shared/schemas/common.schema';
 
 // ==================== Query Schemas ====================

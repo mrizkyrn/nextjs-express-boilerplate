@@ -1,8 +1,8 @@
 import { Response } from 'express';
 
 import { env } from '@/shared/config/environment.config';
-import { ErrorCode } from '@/shared/constant';
-import type { ErrorDetail, ErrorResponse, PaginationMeta, SuccessResponse } from '@/types/response.type';
+import { ErrorCode } from '@/shared/constants';
+import type { ErrorDetail, ErrorResponse, PaginationMeta, SuccessResponse } from '@/shared/types/response.type';
 
 /**
  * Send a standardized success response

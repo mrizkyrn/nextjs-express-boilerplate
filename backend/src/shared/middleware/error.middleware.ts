@@ -2,12 +2,12 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 
-import { logError } from '@/infrastructure/logging/winston.logger';
+import { logger } from '@/infrastructure/logging/winston.logger';
 import { env } from '@/shared/config/environment.config';
-import { ERROR_CODES } from '@/shared/constant';
-import { AppError } from '@/shared/util/error.util';
-import { sendErrorResponse } from '@/shared/util/response.util';
-import type { ErrorDetail, ErrorResponse } from '@/types/response.type';
+import { ERROR_CODES } from '@/shared/constants';
+import type { ErrorDetail, ErrorResponse } from '@/shared/types/response.type';
+import { AppError } from '@/shared/utils/error.util';
+import { sendErrorResponse } from '@/shared/utils/response.util';
 
 /**
  * Global error handler middleware
@@ -30,7 +30,7 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     });
   } else {
     // Server errors - log as error (system issues)
-    logError('Server error occurred', err, {
+    logger.error('Server error occurred', err, {
       url: req.originalUrl,
       method: req.method,
       ip: req.ip,

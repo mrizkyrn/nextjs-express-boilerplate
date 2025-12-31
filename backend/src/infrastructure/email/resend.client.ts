@@ -3,8 +3,8 @@ import { injectable } from 'tsyringe';
 
 import { logger } from '@/infrastructure/logging/winston.logger';
 import { env } from '@/shared/config/environment.config';
-import { ERROR_CODES } from '@/shared/constants/error-codes';
-import { AppError } from '@/shared/util/error.util';
+import { ERROR_CODES } from '@/shared/constants';
+import { AppError } from '@/shared/utils/error.util';
 import { ResendSendOptions, ResendSendResult } from './email.type';
 
 /**
@@ -17,7 +17,7 @@ export class ResendClient {
   private readonly client: Resend;
 
   constructor() {
-    this.client = new Resend(env.RESEND_API_KEY);
+    this.client = new Resend(env.email.resendApiKey);
 
     logger.info('ResendClient initialized with config:', this.getConfig());
   }

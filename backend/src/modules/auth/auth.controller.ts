@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { cookieConfig } from '@/shared/config/auth.config';
-import { ERROR_CODES, REFRESH_TOKEN_COOKIE } from '@/shared/constant';
-import { AppError } from '@/shared/util/error.util';
-import { sendSuccess } from '@/shared/util/response.util';
+import { ERROR_CODES, REFRESH_TOKEN_COOKIE } from '@/shared/constants';
+import { AppError } from '@/shared/utils/error.util';
+import { sendSuccess } from '@/shared/utils/response.util';
 import type {
   ForgotPasswordBody,
   LoginBody,

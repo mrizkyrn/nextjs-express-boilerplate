@@ -2,11 +2,11 @@ import { Prisma, PrismaClient, UserRole } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import { inject, injectable } from 'tsyringe';
 
-import { DI_TYPES, ERROR_CODES } from '@/shared/constant';
+import { DI_TYPES, ERROR_CODES } from '@/shared/constants';
 import type { PaginationMeta } from '@/shared/types/response.type';
-import { AppError } from '@/shared/util/error.util';
-import { calculatePagination, calculateSkip, normalizePaginationParams } from '@/shared/util/pagination.util';
-import { comparePassword, hashPassword } from '@/shared/util/password.util';
+import { AppError } from '@/shared/utils/error.util';
+import { calculatePagination, calculateSkip, normalizePaginationParams } from '@/shared/utils/pagination.util';
+import { comparePassword, hashPassword } from '@/shared/utils/password.util';
 import { mapUserResponse, mapUsersResponse, USER_BASE_SELECT } from './user.mapper';
 import type { CreateUserBody, GetUsersQuery, UpdatePasswordBody, UpdateUserBody } from './user.schema';
 import type { UserResponse, UserStatsResponse } from './user.type';

@@ -1,5 +1,5 @@
-import { ERROR_CODES, ErrorCode } from '@/shared/constant';
-import type { ErrorDetail } from '@/types/response.type';
+import { ERROR_CODES, ErrorCode } from '@/shared/constants';
+import type { ErrorDetail } from '@/shared/types/response.type';
 
 /**
  * Custom error class with error code support
