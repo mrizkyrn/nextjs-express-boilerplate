@@ -1,37 +1,95 @@
+import * as ejs from 'ejs';
+import * as fs from 'fs';
+import * as path from 'path';
+import { dirname } from 'path';
 import { inject, injectable } from 'tsyringe';
+import { fileURLToPath } from 'url';
 
 import type { ILogger } from '@/infrastructure/logging/winston.logger';
 import { env } from '@/shared/config/environment.config';
 import { DI_TYPES, EMAIL_SUBJECTS } from '@/shared/constants';
-import type { EmailRenderer } from './email.renderer';
-import type { PasswordChangedEmailData, PasswordResetEmailData, VerifyEmailData, WelcomeEmailData } from './email.type';
+import type {
+  BaseTemplateData,
+  PasswordChangedEmailData,
+  PasswordResetEmailData,
+  VerifyEmailData,
+  WelcomeEmailData,
+} from './email.type';
 import type { ResendClient } from './resend.client';
 
 /**
  * Email Service
- * Mid-level service for email operations with business logic
- * Handles email composition, rendering, and sending via ResendClient
- * Provider-agnostic interface for sending emails throughout the application
+ * Handles email composition, template rendering, and sending
+ * Provides provider-agnostic interface for sending emails throughout the application
  */
 @injectable()
 export class EmailService {
+  private templatesDir: string;
+
   constructor(
     @inject(DI_TYPES.ResendClient) private readonly resendClient: ResendClient,
-    @inject(DI_TYPES.EmailRenderer) private readonly emailRenderer: EmailRenderer,
     @inject(DI_TYPES.Logger) private readonly logger: ILogger
-  ) {}
+  ) {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    this.templatesDir = path.join(__dirname, './templates');
+  }
 
   // ==================== Private Helper Methods ====================
 
   /**
+   * Render email template with base layout
+   * @private Internal helper for template rendering
+   */
+  private async renderTemplate(
+    templateName: string,
+    data: Record<string, any>,
+    baseData: BaseTemplateData
+  ): Promise<{ html: string; text: string }> {
+    try {
+      const templatePath = path.join(this.templatesDir, `${templateName}.ejs`);
+      const basePath = path.join(this.templatesDir, 'base.ejs');
+
+      if (!fs.existsSync(templatePath)) {
+        throw new Error(`Template not found: ${templateName}`);
+      }
+      if (!fs.existsSync(basePath)) {
+        throw new Error('Base template not found');
+      }
+
+      const content = await ejs.renderFile(templatePath, data);
+      const html = await ejs.renderFile(basePath, { ...baseData, content });
+      const text = this.htmlToText(html);
+
+      return { html, text };
+    } catch (error) {
+      this.logger.error(`Error rendering template ${templateName}:`, { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Convert HTML to plain text
+   * @private Internal helper for text version generation
+   */
+  private htmlToText(html: string): string {
+    return html
+      .replace(/<style[^>]*>.*?<\/style>/gs, '')
+      .replace(/<script[^>]*>.*?<\/script>/gs, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .trim();
+  }
+
+  /**
    * Send email with rendered content
    * @private Internal helper for sending emails
-   *
-   * @param to - Recipient email address(es)
-   * @param subject - Email subject
-   * @param html - HTML content
-   * @param text - Plain text content
-   * @param emailType - Type of email for logging
    */
   private async sendEmail(
     to: string | string[],
@@ -76,7 +134,12 @@ export class EmailService {
    * Sends verification link to confirm email address
    */
   async sendVerifyEmail(to: string, data: VerifyEmailData): Promise<void> {
-    const { html, text } = await this.emailRenderer.renderVerifyEmail(data);
+    const { html, text } = await this.renderTemplate('verify-email', data, {
+      headerTitle: 'Verifikasi Alamat Email Anda',
+      headerColor: '#8B5CF6',
+      buttonColor: '#8B5CF6',
+      footerUrl: data.verifyUrl,
+    });
 
     await this.sendEmail(to, EMAIL_SUBJECTS.VERIFY_EMAIL, html, text, 'Email verification');
   }
@@ -86,7 +149,12 @@ export class EmailService {
    * Sends welcome message with account setup information
    */
   async sendWelcomeEmail(to: string, data: WelcomeEmailData): Promise<void> {
-    const { html, text } = await this.emailRenderer.renderWelcomeEmail(data);
+    const { html, text } = await this.renderTemplate('welcome', data, {
+      headerTitle: 'Selamat Datang!',
+      headerColor: '#4F46E5',
+      buttonColor: '#4F46E5',
+      footerUrl: data.loginUrl,
+    });
 
     await this.sendEmail(to, EMAIL_SUBJECTS.WELCOME, html, text, 'Welcome');
   }
@@ -98,7 +166,12 @@ export class EmailService {
    * Sends password reset link to user email
    */
   async sendPasswordResetEmail(to: string, data: PasswordResetEmailData): Promise<void> {
-    const { html, text } = await this.emailRenderer.renderPasswordResetEmail(data);
+    const { html, text } = await this.renderTemplate('password-reset', data, {
+      headerTitle: 'Atur Ulang Kata Sandi Anda',
+      headerColor: '#EF4444',
+      buttonColor: '#EF4444',
+      footerUrl: data.resetUrl,
+    });
 
     await this.sendEmail(to, EMAIL_SUBJECTS.PASSWORD_RESET, html, text, 'Password reset');
   }
@@ -113,10 +186,18 @@ export class EmailService {
       timeStyle: 'long',
     });
 
-    const { html, text } = await this.emailRenderer.renderPasswordChangedEmail({
-      userName: data.userName,
-      formattedTime,
-    });
+    const { html, text } = await this.renderTemplate(
+      'password-changed',
+      {
+        userName: data.userName,
+        formattedTime,
+      },
+      {
+        headerTitle: '✓ Kata Sandi Berhasil Diubah',
+        headerColor: '#10B981',
+        buttonColor: '#10B981',
+      }
+    );
 
     await this.sendEmail(to, EMAIL_SUBJECTS.PASSWORD_CHANGED, html, text, 'Password changed confirmation');
   }

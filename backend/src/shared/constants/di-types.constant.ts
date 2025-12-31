@@ -5,7 +5,6 @@ export const DI_TYPES = {
 
   // ==================== Infrastructure ====================
   EmailService: Symbol.for('EmailService'),
-  EmailRenderer: Symbol.for('EmailRenderer'),
   ResendClient: Symbol.for('ResendClient'),
   PrismaClient: Symbol.for('PrismaClient'),
   Logger: Symbol.for('Logger'),
