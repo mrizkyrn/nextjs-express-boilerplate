@@ -8,7 +8,7 @@ import { DI_TYPES, ERROR_CODES, TOKEN } from '@/shared/constants';
 import { AppError } from '@/shared/utils/error.util';
 import { generateTokenPair, verifyRefreshToken } from '@/shared/utils/jwt.util';
 import { comparePassword, hashPassword } from '@/shared/utils/password.util';
-import { calculateTokenExpiry, generateSecureToken } from '@/shared/utils/token.utils';
+import { calculateTokenExpiry, generateSecureToken } from '@/shared/utils/token.util';
 import { mapUserResponse, USER_BASE_SELECT } from '../users/user.mapper';
 import type {
   ForgotPasswordBody,
@@ -229,19 +229,19 @@ export class AuthService {
     // Validate credentials
     const user = await this.findUserByEmail(email);
     if (!user) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'Kredensial tidak valid', ERROR_CODES.UNAUTHORIZED);
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid credentials', ERROR_CODES.UNAUTHORIZED);
     }
 
     const isPasswordValid = await comparePassword(password, user.password);
     if (!isPasswordValid) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'Kredensial tidak valid', ERROR_CODES.UNAUTHORIZED);
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid credentials', ERROR_CODES.UNAUTHORIZED);
     }
 
     // Check email verification
     if (!user.emailVerified) {
       throw new AppError(
         StatusCodes.FORBIDDEN,
-        'Silakan verifikasi email Anda sebelum login',
+        'Please verify your email before logging in',
         ERROR_CODES.EMAIL_NOT_VERIFIED
       );
     }
@@ -262,12 +262,12 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: decoded.userId } });
 
     if (!user) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'Pengguna tidak ditemukan', ERROR_CODES.UNAUTHORIZED);
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found', ERROR_CODES.UNAUTHORIZED);
     }
 
     // Validate refresh token matches stored token
     if (user.refreshToken !== refreshToken) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'Token refresh tidak valid', ERROR_CODES.INVALID_TOKEN);
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid refresh token', ERROR_CODES.INVALID_TOKEN);
     }
 
     // Generate new token pair (token rotation for security)
@@ -301,7 +301,7 @@ export class AuthService {
     if (!user) {
       throw new AppError(
         StatusCodes.BAD_REQUEST,
-        'Token verifikasi tidak valid atau sudah kedaluwarsa',
+        'Verification token is invalid or has expired',
         ERROR_CODES.INVALID_VERIFICATION_TOKEN
       );
     }
@@ -339,7 +339,7 @@ export class AuthService {
 
     // Check if already verified
     if (user.emailVerified) {
-      throw new AppError(StatusCodes.BAD_REQUEST, 'Email sudah diverifikasi', ERROR_CODES.EMAIL_ALREADY_VERIFIED);
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Email is already verified', ERROR_CODES.EMAIL_ALREADY_VERIFIED);
     }
 
     // Check cooldown period
@@ -407,7 +407,7 @@ export class AuthService {
     if (!user) {
       throw new AppError(
         StatusCodes.BAD_REQUEST,
-        'Token reset tidak valid atau sudah kedaluwarsa',
+        'Reset token is invalid or has expired',
         ERROR_CODES.INVALID_RESET_TOKEN
       );
     }

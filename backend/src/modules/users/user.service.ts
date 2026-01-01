@@ -28,7 +28,7 @@ export class UserService {
     });
 
     if (!exists) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Pengguna tidak ditemukan', ERROR_CODES.NOT_FOUND);
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found', ERROR_CODES.NOT_FOUND);
     }
   }
 
@@ -44,7 +44,7 @@ export class UserService {
     });
 
     if (existingUsers.length === 0) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Pengguna tidak ditemukan', ERROR_CODES.NOT_FOUND);
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found', ERROR_CODES.NOT_FOUND);
     }
 
     return existingUsers.map((u) => u.id);
@@ -62,7 +62,7 @@ export class UserService {
     });
 
     if (existingUser && existingUser.id !== excludeUserId) {
-      throw new AppError(StatusCodes.CONFLICT, 'Email sudah digunakan', ERROR_CODES.DUPLICATE_ENTRY);
+      throw new AppError(StatusCodes.CONFLICT, 'Email already in use', ERROR_CODES.DUPLICATE_ENTRY);
     }
   }
 
@@ -124,7 +124,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Pengguna tidak ditemukan', ERROR_CODES.NOT_FOUND);
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found', ERROR_CODES.NOT_FOUND);
     }
 
     return mapUserResponse(user);
@@ -222,13 +222,13 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Pengguna tidak ditemukan', ERROR_CODES.NOT_FOUND);
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found', ERROR_CODES.NOT_FOUND);
     }
 
     // Verify current password before allowing change
     const isPasswordValid = await comparePassword(currentPassword, user.password);
     if (!isPasswordValid) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'Password saat ini salah', ERROR_CODES.UNAUTHORIZED);
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Current password is incorrect', ERROR_CODES.UNAUTHORIZED);
     }
 
     // Hash new password and update

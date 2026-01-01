@@ -135,7 +135,7 @@ export class EmailService {
    */
   async sendVerifyEmail(to: string, data: VerifyEmailData): Promise<void> {
     const { html, text } = await this.renderTemplate('verify-email', data, {
-      headerTitle: 'Verifikasi Alamat Email Anda',
+      headerTitle: 'Verify Your Email Address',
       headerColor: '#8B5CF6',
       buttonColor: '#8B5CF6',
       footerUrl: data.verifyUrl,
@@ -150,7 +150,7 @@ export class EmailService {
    */
   async sendWelcomeEmail(to: string, data: WelcomeEmailData): Promise<void> {
     const { html, text } = await this.renderTemplate('welcome', data, {
-      headerTitle: 'Selamat Datang!',
+      headerTitle: 'Welcome!',
       headerColor: '#4F46E5',
       buttonColor: '#4F46E5',
       footerUrl: data.loginUrl,
@@ -167,7 +167,7 @@ export class EmailService {
    */
   async sendPasswordResetEmail(to: string, data: PasswordResetEmailData): Promise<void> {
     const { html, text } = await this.renderTemplate('password-reset', data, {
-      headerTitle: 'Atur Ulang Kata Sandi Anda',
+      headerTitle: 'Reset Your Password',
       headerColor: '#EF4444',
       buttonColor: '#EF4444',
       footerUrl: data.resetUrl,
@@ -193,7 +193,7 @@ export class EmailService {
         formattedTime,
       },
       {
-        headerTitle: '✓ Kata Sandi Berhasil Diubah',
+        headerTitle: '✓ Password Successfully Changed',
         headerColor: '#10B981',
         buttonColor: '#10B981',
       }

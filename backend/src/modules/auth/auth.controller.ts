@@ -23,7 +23,7 @@ export class AuthController {
 
   async register(req: Request<{}, {}, RegisterBody>, res: Response, next: NextFunction) {
     const result = await this.authService.register(req.body);
-    sendSuccess<RegisterResponse>(res, StatusCodes.CREATED, 'Registrasi Berhasil', {
+    sendSuccess<RegisterResponse>(res, StatusCodes.CREATED, 'Registration successful', {
       email: result.user.email,
     });
   }
@@ -31,7 +31,7 @@ export class AuthController {
   async login(req: Request<{}, {}, LoginBody>, res: Response, next: NextFunction) {
     const result = await this.authService.login(req.body);
     res.cookie(REFRESH_TOKEN_COOKIE, result.tokens.refreshToken, cookieConfig);
-    sendSuccess<LoginResponse>(res, StatusCodes.OK, 'Login Berhasil', {
+    sendSuccess<LoginResponse>(res, StatusCodes.OK, 'Login successful', {
       user: result.user,
       accessToken: result.tokens.accessToken,
     });
@@ -40,13 +40,13 @@ export class AuthController {
   async refresh(req: Request, res: Response, next: NextFunction) {
     const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE];
     if (!refreshToken) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'Refresh token tidak ditemukan', ERROR_CODES.UNAUTHORIZED);
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Refresh token not found', ERROR_CODES.UNAUTHORIZED);
     }
 
     const result = await this.authService.refresh(refreshToken);
     res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, cookieConfig);
 
-    sendSuccess<RefreshTokenResponse>(res, StatusCodes.OK, 'Token berhasil diperbarui', {
+    sendSuccess<RefreshTokenResponse>(res, StatusCodes.OK, 'Token successfully refreshed', {
       accessToken: result.accessToken,
     });
   }
@@ -55,30 +55,30 @@ export class AuthController {
     const userId = req.user!.id;
     await this.authService.logout(userId);
     res.clearCookie(REFRESH_TOKEN_COOKIE, cookieConfig);
-    sendSuccess(res, StatusCodes.OK, 'Logout berhasil');
+    sendSuccess(res, StatusCodes.OK, 'Logout successful');
   }
 
   // ==================== Email Verification ====================
 
   async verifyEmail(req: Request<{}, {}, VerifyEmailBody>, res: Response, next: NextFunction) {
     await this.authService.verifyEmail(req.body);
-    sendSuccess(res, StatusCodes.OK, 'Email berhasil diverifikasi');
+    sendSuccess(res, StatusCodes.OK, 'Email successfully verified');
   }
 
   async resendVerification(req: Request<{}, {}, ResendVerificationBody>, res: Response, next: NextFunction) {
     await this.authService.resendVerification(req.body);
-    sendSuccess(res, StatusCodes.OK, 'Jika akun dengan email tersebut ada, tautan verifikasi telah dikirim');
+    sendSuccess(res, StatusCodes.OK, 'If an account with that email exists, a verification link has been sent');
   }
 
   // ==================== Password Reset ====================
 
   async forgotPassword(req: Request<{}, {}, ForgotPasswordBody>, res: Response, next: NextFunction) {
     await this.authService.forgotPassword(req.body);
-    sendSuccess(res, StatusCodes.OK, 'Jika akun dengan email tersebut ada, tautan reset password telah dikirim');
+    sendSuccess(res, StatusCodes.OK, 'If an account with that email exists, a password reset link has been sent');
   }
 
   async resetPassword(req: Request<{}, {}, ResetPasswordBody>, res: Response, next: NextFunction) {
     await this.authService.resetPassword(req.body);
-    sendSuccess(res, StatusCodes.OK, 'Password berhasil direset');
+    sendSuccess(res, StatusCodes.OK, 'Password successfully reset');
   }
 }
