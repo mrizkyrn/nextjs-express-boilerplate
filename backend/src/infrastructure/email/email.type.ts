@@ -44,25 +44,6 @@ export interface VerifyEmailData {
   expiresIn: number; // in minutes
 }
 
-export interface TNIVerificationApprovedEmailData {
-  userName: string;
-  approvedAt: Date;
-}
-
-export interface TNIVerificationRejectedEmailData {
-  userName: string;
-  rejectionReason: string;
-  rejectedAt: Date;
-  resubmitUrl: string;
-}
-
-export interface BookingReminderEmailData {
-  userName: string;
-  serviceName: string;
-  scheduleDate: Date;
-  amount: number;
-}
-
 // ==================== Template Data Interfaces ====================
 
 export interface BaseTemplateData {
@@ -70,49 +51,4 @@ export interface BaseTemplateData {
   headerColor?: string;
   buttonColor?: string;
   footerUrl?: string;
-}
-
-export interface WelcomeTemplateData {
-  userName: string;
-  loginUrl: string;
-}
-
-export interface VerifyEmailTemplateData {
-  userName: string;
-  verifyUrl: string;
-  expiresIn: number;
-}
-
-export interface PasswordResetTemplateData {
-  userName: string;
-  resetUrl: string;
-  expiresIn: number;
-}
-
-export interface PasswordChangedTemplateData {
-  userName: string;
-  formattedTime: string;
-}
-
-export interface TNIVerificationApprovedTemplateData {
-  userName: string;
-  approvedAt: Date;
-  formattedApprovedTime: string;
-}
-
-export interface TNIVerificationRejectedTemplateData {
-  userName: string;
-  rejectionReason: string;
-  rejectedAt: Date;
-  resubmitUrl: string;
-  formattedRejectedTime: string;
-}
-
-export interface BookingReminderTemplateData {
-  userName: string;
-  serviceName: string;
-  scheduleDate: Date;
-  formattedDate: string;
-  formattedTime: string;
-  formattedAmount: string;
 }
