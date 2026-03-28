@@ -17,6 +17,7 @@ export class AppError extends Error {
     public isOperational = true
   ) {
     super(message);
+    this.name = 'AppError';
     this.errorCode = errorCode || ERROR_CODES.INTERNAL_SERVER_ERROR;
     this.details = details;
     Object.setPrototypeOf(this, AppError.prototype);

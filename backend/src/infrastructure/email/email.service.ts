@@ -1,9 +1,7 @@
 import * as ejs from 'ejs';
 import * as fs from 'fs';
 import * as path from 'path';
-import { dirname } from 'path';
 import { inject, injectable } from 'tsyringe';
-import { fileURLToPath } from 'url';
 
 import type { ILogger } from '@/infrastructure/logging/winston.logger';
 import { env } from '@/shared/config/environment.config';
@@ -30,8 +28,6 @@ export class EmailService {
     @inject(DI_TYPES.ResendClient) private readonly resendClient: ResendClient,
     @inject(DI_TYPES.Logger) private readonly logger: ILogger
   ) {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
     this.templatesDir = path.join(__dirname, './templates');
   }
 

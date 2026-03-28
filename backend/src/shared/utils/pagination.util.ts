@@ -41,11 +41,11 @@ export const normalizePaginationParams = (
   page?: number | string,
   limit?: number | string
 ): { page: number; limit: number } => {
-  const normalizedPage = Math.max(1, Number(page) || 1);
-  const normalizedLimit = Math.min(
-    PAGINATION.MAX_PAGE_SIZE,
-    Math.max(1, Number(limit) || PAGINATION.DEFAULT_PAGE_SIZE)
-  );
+  const normalizedPage = Math.max(1, Math.floor(Number(page)) || 1);
+
+  // Parse and normalize limit
+  const parsedLimit = Number.isNaN(Number(limit)) ? PAGINATION.DEFAULT_PAGE_SIZE : Math.floor(Number(limit)!);
+  const normalizedLimit = Math.min(PAGINATION.MAX_PAGE_SIZE, Math.max(1, parsedLimit));
 
   return {
     page: normalizedPage,
