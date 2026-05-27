@@ -1,6 +1,7 @@
 import * as ejs from 'ejs';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { inject, injectable } from 'tsyringe';
 
 import type { ILogger } from '@/infrastructure/logging/winston.logger';
@@ -14,6 +15,10 @@ import type {
   WelcomeEmailData,
 } from './email.type';
 import type { ResendClient } from './resend.client';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Email Service

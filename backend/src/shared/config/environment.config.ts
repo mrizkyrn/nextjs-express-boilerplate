@@ -24,7 +24,7 @@ const envSchema = z.object({
     .default(false),
 
   RESEND_API_KEY: z.string().min(1, 'Resend API key is required'),
-  EMAIL_FROM: z.email('Invalid sender email address'),
+  EMAIL_FROM: z.string(),
 });
 
 type EnvironmentVariables = z.infer<typeof envSchema>;
